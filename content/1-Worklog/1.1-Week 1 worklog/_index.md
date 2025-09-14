@@ -5,9 +5,8 @@ chapter: false
 pre: "<b> 1. </b>"
 ---
 
-# WEEK 1 WORKLOG
-
 ## Week 1 Objectives: 
+
 - Study how to write a roadmap.
 - Plan to study AWS in parallel with each phase of the project. 
 - Study on how to use hugo for workshop
@@ -17,6 +16,7 @@ pre: "<b> 1. </b>"
 - Create AWS account, setup IAMs for teammate.
 
 ## Tasks to be carried out this week
+
 | Day | Tasks                                                                                                                                                           | Start Dat | End Date  | References                                                                                                                                                                                                                                                |
 |-----|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | 1   | - Planning for project. <br>- Meeting with FCJ teammate on the MVP. <br>- Write a draft for the roadmap after meeting.                                          | 8/9/2025  | 8/9/2025  |                                                                                                                                                                                                                                                           |
