@@ -5,5 +5,6 @@ chapter: false
 pre: "<b> 1. </b>"
 ---
 
-Week 1: [Getting use to AWS service, planning for project](1.1-week%201%20worklog/)
+Week 1: [Getting use to AWS service, planning for project](1.1-week%201%20Worklog/)
+Week 2: [Settings up AWS accounts, init first landing for project](1.2-Week%202%20Worklog/)
 

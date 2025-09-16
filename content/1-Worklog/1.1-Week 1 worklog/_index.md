@@ -5,7 +5,7 @@ chapter: false
 pre: "<b> 1. </b>"
 ---
 
-## Week 1 Objectives: 
+## Week 1 Objectives
 
 - Study how to write a roadmap.
 - Plan to study AWS in parallel with each phase of the project. 
