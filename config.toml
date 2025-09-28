@@ -15,7 +15,7 @@ home = [ "HTML", "RSS", "JSON"]
   # Change default color scheme with a variant one. Can be "red", "blue", "green".
   themeVariant = "workshop"
   # Git hub repo link
-  editURL = "https://github.com/tiozo/aws-fcj-tiozo-worklog"
+  editURL = "https://tiozo.github.io/aws-fcj-tiozo-worklog/"
   description = ""
   # Enter your e-mail address
   author = "azinz850@gmail.com"
