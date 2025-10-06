@@ -18,5 +18,5 @@ pre: "<b> 1. </b>"
 | Day | Tasks | Start Dat | End Date | References |
 |---|---|---|---|---|
 | 1-3 | - Study Python with FastAPI and Python on AWS.<br>- How to desgin a Microservice on AWS ? How to maintain a high availability and consistency ? (get to know the concept) | 29/9/2025 | 1/10/2025 | - https://youtu.be/P62lCiZKZgo?si=AOVQVqwYlDajOBwA<br>- https://catalog.us-east-1.prod.workshops.aws/workshops/10141411-0192-4021-afa8-2436f3c66bd8/en-US |
-| 4 | - Practice:<br> <&emsp>+ AWS Lamda invoked when a file is uploaded to S3.<br> <&emsp>+ Invoke Bedrock model through an inference model (Meta). (Again) <br>- Task:<br> <&emsp>+ Sliced a PDF file to multiples of 8 pages file, for a small fitting around 2k input token per query. | 2/10/2025 | 2/10/2025 |  |
+| 4 | - Practice:<br>&nbsp;&nbsp;&nbsp;&nbsp;+ AWS Lamda invoked when a file is uploaded to S3.<br>&nbsp;&nbsp;&nbsp;&nbsp;+ Invoke Bedrock model through an inference model (Meta). (Again) <br>- Task:<br>&nbsp;&nbsp;&nbsp;&nbsp;+ Sliced a PDF file to multiples of 8 pages file, for a small fitting around 2k input token per query. | 2/10/2025 | 2/10/2025 |  |
 | 5 | - Translate blog | 3/10/2025 | 3/10/2025 |  |
