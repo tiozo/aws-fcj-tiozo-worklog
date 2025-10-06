@@ -1,8 +1,8 @@
 ---
 title: "Proposal"
-date: "29-09-2025"
 weight: 1
 chapter: false
+pre: "<b> 2. </b>"
 ---
 
 # AUTOMATED TAGGING SYSTEM FOR VIETNAMESE MATH PROBLEM
