@@ -60,32 +60,38 @@ Provided a monitoring method, for users to view via CloudWatch on AWS, to know t
 ![Architecture Overview](/images/2-Proposal/architecture.png)
 
 ```
-1. DEVELOPER DEPLOYMENT (CI/CD PIPELINE)
-IAM User (in pre-production) → Git push → AWS CodePipeline triggered → CodeBuild Stage: 
-• Fetches source code 
-• Builds Java/.jar artifact 
-• Stores build artifact in S3 (encrypted via KMS) → CodeDeploy Stage: 
-    • Triggered by successful build 
-    • Uses CloudFormation to provision/update infrastructure 
-• Deploys new artifact from S3 to EC2 instance(s).
+1.  **User Request:** The user accesses the frontend of the application, which is a static website hosted in an S3 bucket and served globally via CloudFront for low latency.
 
-1. USER FILE SUBMISSION
-User → Accesses Static Web App (S3/CloudFront) → Uploads image or PDF → Frontend sends file (HTTPS POST) → Backend EC2 Java Application.
+2.  **API Call:** The frontend sends an HTTPS request (containing the uploaded image/PDF) to the backend Java application running on an EC2 instance within a secure VPC.
 
-1. BACKEND PROCESSING & ANALYSIS
-EC2 App → Stores raw file in S3_Application bucket. → If PDF: Use library to extract pages as individual images. → For each image: 
-• Step A (OCR): Process with OCR Model (Claude Sonnet) → Extract equation(s) as LaTeX string(s). 
-• Step B (Embedding): For each LaTeX string → Generate vector using Titan Embedding V2. 
-• Step C (Search): Query Qdrant vector DB with vector → Get list of similar problem IDs.
+3.  **AI Processing (Orchestration):** The Java application orchestrates the AI workflow.
+    * **3a. OCR Request:** The application sends the image data to the **Claude Sonnet 3.7** model in AWS Bedrock. Claude analyzes the image and returns the transcribed mathematical equation as a LaTeX string.
+    * **3b. Embedding Request:** The application sends the extracted LaTeX string to the **Titan Embedding V2** model. Titan converts the string into a numerical vector that captures its semantic meaning.
 
-1. DATA RETRIEVAL & RESPONSE
-EC2 App → Collects all similar problem IDs from Qdrant. → Queries MySQL Database with IDs → Fetches full problem details (text, solution, etc.). → Aggregates results (transcribed LaTeX + similar problems) → Sends single JSON response to frontend.
+4.  **Data Storage & Retrieval:** The application interacts with the databases.
+    * **4a. Vector Search:** The generated vector is used to query the **Qdrant Vector Database** to find the IDs of the most similar problems already in the system.
+    * **4b. Data Fetching:** The application uses the IDs from Qdrant to query the **MySQL Database** on RDS to retrieve the full details (problem statement, solution, tags) for each similar problem.
 
-1. RESULTS DISPLAY
-Frontend receives JSON response → Renders LaTeX using MathJax/KaTeX. → Displays list of similar problems fetched from MySQL. → If PDF was uploaded, results are grouped by page.
+5.  **Temporary Storage:** The initial image/PDF uploaded by the user is stored in a dedicated S3 bucket (`S3_Application`). This serves as a temporary record of the input.
 
-1. MONITORING & LOGGING
-Backend Application & AWS Services → Push all logs and performance metrics → CloudWatch. → S3 bucket access (GetRequest, PutRequest) & costs → Monitored via CloudWatch. → All AWS API calls made during the process → Logged in CloudTrail for audit.
+6.  **Monitoring & Logging:** All application activities, logs, performance metrics, and costs are sent to **AWS CloudWatch**.
+    * **6a. Application Logs:** The EC2 instance sends its logs to CloudWatch.
+    * **6b. S3 Access Logs:** S3 access events (like `PutObject`) are logged for monitoring and auditing.
+
+7.  **Bedrock API Calls:** This represents the underlying API calls made from the Java application to the Bedrock service to invoke the Claude and Titan models.
+
+### Pre-Production Workflow (Developer CI/CD)
+
+8.  **Developer Push:** An authorized **IAM User** (the developer) pushes new code to a source code repository (e.g., GitHub, AWS CodeCommit).
+
+9.  **CI/CD Pipeline Execution:** The code push triggers the **AWS CodePipeline**.
+    * **Source Stage:** Fetches the latest code.
+    * **Build Stage (CodeBuild):** Compiles the Java code, runs tests, and packages the application into a `.jar` artifact. This artifact is then stored securely in an S3 bucket, encrypted using a **KMS key**.
+    * **Deploy Stage:** The pipeline proceeds to the deployment stage.
+
+10. **Automated Deployment:**
+    * **AWS CloudFormation** is used to provision or update the entire infrastructure stack (VPC, EC2, RDS, etc.) based on templates. This ensures consistent and repeatable deployments.
+    * The new application artifact from the S3 bucket is deployed to the EC2 instance(s).
 ```
 
 ### Asssumetion
