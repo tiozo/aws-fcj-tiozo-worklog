@@ -57,7 +57,7 @@ Provided a monitoring method, for users to view via CloudWatch on AWS, to know t
 
 ### Solution Architecture Overview
 
-![Architecture Overview](/images/architecture.png)
+![Architecture Overview](/architecture.png)
 
 ```
 1. DEVELOPER DEPLOYMENT (CI/CD PIPELINE)
