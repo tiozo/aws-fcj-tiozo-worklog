@@ -59,7 +59,7 @@ Provided a monitoring method, for users to view via CloudWatch on AWS, to know t
 
 ![Architecture Overview](/images/2-Proposal/architecture.png)
 
-```
+```markdown
 1.  **User Request:** The user accesses the frontend of the application, which is a static website hosted in an S3 bucket and served globally via CloudFront for low latency.
 
 2.  **API Call:** The frontend sends an HTTPS request (containing the uploaded image/PDF) to the backend Java application running on an EC2 instance within a secure VPC.
