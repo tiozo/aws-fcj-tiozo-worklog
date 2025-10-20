@@ -59,3 +59,5 @@ url = "https://www.facebook.com/groups/awsstudygroupfcj"
 weight = 20
 
 canonifyURLs = true
+
+baseURL = "https://tiozo.github.io/aws-fcj-tiozo-worklog/"
