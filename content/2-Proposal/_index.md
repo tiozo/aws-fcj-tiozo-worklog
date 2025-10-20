@@ -57,7 +57,7 @@ Provided a monitoring method, for users to view via CloudWatch on AWS, to know t
 
 ### Solution Architecture Overview
 
-![Architecture Overview](/static/images/architecture.png)
+![Architecture Overview](images/architecture.png)
 
 ```
 1. DEVELOPER DEPLOYMENT (CI/CD PIPELINE)
@@ -69,22 +69,22 @@ IAM User (in pre-production) → Git push → AWS CodePipeline triggered → Cod
     • Uses CloudFormation to provision/update infrastructure 
 • Deploys new artifact from S3 to EC2 instance(s).
 
-2. USER FILE SUBMISSION
+1. USER FILE SUBMISSION
 User → Accesses Static Web App (S3/CloudFront) → Uploads image or PDF → Frontend sends file (HTTPS POST) → Backend EC2 Java Application.
 
-3. BACKEND PROCESSING & ANALYSIS
+1. BACKEND PROCESSING & ANALYSIS
 EC2 App → Stores raw file in S3_Application bucket. → If PDF: Use library to extract pages as individual images. → For each image: 
 • Step A (OCR): Process with OCR Model (Claude Sonnet) → Extract equation(s) as LaTeX string(s). 
 • Step B (Embedding): For each LaTeX string → Generate vector using Titan Embedding V2. 
 • Step C (Search): Query Qdrant vector DB with vector → Get list of similar problem IDs.
 
-4. DATA RETRIEVAL & RESPONSE
+1. DATA RETRIEVAL & RESPONSE
 EC2 App → Collects all similar problem IDs from Qdrant. → Queries MySQL Database with IDs → Fetches full problem details (text, solution, etc.). → Aggregates results (transcribed LaTeX + similar problems) → Sends single JSON response to frontend.
 
-5. RESULTS DISPLAY
+1. RESULTS DISPLAY
 Frontend receives JSON response → Renders LaTeX using MathJax/KaTeX. → Displays list of similar problems fetched from MySQL. → If PDF was uploaded, results are grouped by page.
 
-6. MONITORING & LOGGING
+1. MONITORING & LOGGING
 Backend Application & AWS Services → Push all logs and performance metrics → CloudWatch. → S3 bucket access (GetRequest, PutRequest) & costs → Monitored via CloudWatch. → All AWS API calls made during the process → Logged in CloudTrail for audit.
 ```
 
