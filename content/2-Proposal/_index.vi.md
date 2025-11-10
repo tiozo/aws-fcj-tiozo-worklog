@@ -15,7 +15,7 @@ Dự án này là một **nền tảng phát hiện gian lận và xử lý than
 
 🔹 **Phát Hiện Gian Lận Tiên Tiến Được Hỗ Trợ Bởi ML**
 
-Tích hợp các mô hình phát hiện gian lận XGBoost và phát hiện bất thường Autopilot để nhận diện các giao dịch đáng ngờ trong thời gian thực, bảo vệ cả người bán và khách hàng khỏi các hoạt động gian lận.
+Tích hợp các mô hình phát hiện gian lận XGBoost và phát hiện bất thường Autoencoder để nhận diện các giao dịch đáng ngờ trong thời gian thực, bảo vệ cả người bán và khách hàng khỏi các hoạt động gian lận.
 
 🔹 **Kiến Trúc Xử Lý Thanh Toán Có Thể Mở Rộng**
 
@@ -37,7 +37,7 @@ Kiến trúc bảo mật đa lớp bao gồm AWS WAF, VPC PrivateLink, Secrets M
     
     Cloud: VPC, ALB, API Gateway, Lambda, S3, StyleDB
     
-    ML/AI: SageMaker, XGBoost, Autopilot, Kinesis Firehose
+    ML/AI: SageMaker, XGBoost, Autoencoder, Kinesis Firehose
     
     DevOps: GitLab CI/CD với xác thực OIDC
 
@@ -76,7 +76,7 @@ Nền tảng cung cấp giám sát và phân tích toàn diện thông qua Cloud
 
 5. **Tổng Hợp Dữ Liệu:** Các hàm Lambda Stream Handle thu thập và tổng hợp dữ liệu giao dịch, lưu trữ trong Work History Subnet (StyleDB) và streaming đến Kinesis Firehose.
 
-6. **Huấn Luyện và Suy Luận Mô Hình ML:** Kinesis Firehose stream dữ liệu đến Lớp ML nơi các mô hình XGBoost Fraud Detection và Autopilot Anomaly Detection phân tích giao dịch, với kết quả được hiển thị trong QuickSight.
+6. **Huấn Luyện và Suy Luận Mô Hình ML:** Kinesis Firehose stream dữ liệu đến Lớp ML nơi các mô hình XGBoost Fraud Detection và Autoencoder Anomaly Detection phân tích giao dịch, với kết quả được hiển thị trong QuickSight.
 
 **Quản Lý Dữ Liệu**
 
@@ -189,7 +189,7 @@ Dự án này cung cấp kinh nghiệm trong:
 
 #### Tích Hợp ML Tiên Tiến
 * **Phát Hiện Gian Lận Thời Gian Thực:** Chứng minh khả năng triển khai các mô hình ML production cho các chức năng kinh doanh quan trọng
-* **Kiến Trúc Đa Mô Hình:** Thể hiện chuyên môn trong việc orchestrate nhiều mô hình ML (XGBoost, Autopilot) để phát hiện gian lận toàn diện
+* **Kiến Trúc Đa Mô Hình:** Thể hiện chuyên môn trong việc orchestrate nhiều mô hình ML (XGBoost, Autoencoder) để phát hiện gian lận toàn diện
 * **Pipeline ML Streaming:** Triển khai xử lý dữ liệu thời gian thực và suy luận mô hình ở quy mô lớn
 
 #### Kiến Trúc Doanh Nghiệp
@@ -207,7 +207,7 @@ Dự án này cung cấp kinh nghiệm trong:
 Dự án này chứng minh một **nền tảng phát hiện gian lận và xử lý thanh toán được hỗ trợ bởi ML cấp production** thể hiện:
 
 #### **Hoạt Động ML Tiên Tiến**
-Phát hiện gian lận thời gian thực với các mô hình XGBoost và Autopilot
+Phát hiện gian lận thời gian thực với các mô hình XGBoost và Autoencoder
 Pipeline dữ liệu streaming với Kinesis Firehose
 Phân tích toàn diện với dashboard QuickSight
 

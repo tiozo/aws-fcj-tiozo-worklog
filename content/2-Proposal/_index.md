@@ -15,7 +15,7 @@ The project is a **comprehensive fraud detection and payment processing platform
 
 🔹 **Advanced ML-Powered Fraud Detection**
 
-Features XGBoost fraud detection models and Autopilot anomaly detection to identify suspicious transactions in real-time, protecting both merchants and customers from fraudulent activities.
+Features XGBoost fraud detection models and Autoencoder anomaly detection to identify suspicious transactions in real-time, protecting both merchants and customers from fraudulent activities.
 
 🔹 **Scalable Payment Processing Architecture**
 
@@ -37,7 +37,7 @@ Multi-layered security architecture featuring AWS WAF, VPC PrivateLink, Secrets 
     
     Cloud: VPC, ALB, API Gateway, Lambda, S3, StyleDB
     
-    ML/AI: SageMaker, XGBoost, Autopilot, Kinesis Firehose
+    ML/AI: SageMaker, XGBoost, Autoencoder, Kinesis Firehose
     
     DevOps: GitLab CI/CD with OIDC authentication
 
@@ -76,7 +76,7 @@ The platform offers comprehensive monitoring and analytics through CloudWatch an
 
 5. **Data Aggregation:** Stream Handle Lambda functions collect and aggregate transaction data, storing it in Work History Subnet (StyleDB) and streaming to Kinesis Firehose.
 
-6. **ML Model Training and Inference:** Kinesis Firehose streams data to the ML Layer where XGBoost Fraud Detection and Autopilot Anomaly Detection models analyze transactions, with results visualized in QuickSight.
+6. **ML Model Training and Inference:** Kinesis Firehose streams data to the ML Layer where XGBoost Fraud Detection and Autoencoder Anomaly Detection models analyze transactions, with results visualized in QuickSight.
 
 **Data Management**
 
@@ -189,7 +189,7 @@ This project provides experience in:
 
 #### Advanced ML Integration
 * **Real-time Fraud Detection:** Demonstrates ability to deploy production ML models for critical business functions
-* **Multi-model Architecture:** Shows expertise in orchestrating multiple ML models (XGBoost, Autopilot) for comprehensive fraud detection
+* **Multi-model Architecture:** Shows expertise in orchestrating multiple ML models (XGBoost, Autoencoder) for comprehensive fraud detection
 * **Streaming ML Pipeline:** Implements real-time data processing and model inference at scale
 
 #### Enterprise Architecture
@@ -207,7 +207,7 @@ This project provides experience in:
 This project demonstrates a **production-grade ML-powered fraud detection and payment processing platform** showcasing:
 
 #### **Advanced ML Operations**
-Real-time fraud detection with XGBoost and Autopilot models
+Real-time fraud detection with XGBoost and Autoencoder models
 Streaming data pipelines with Kinesis Firehose
 Comprehensive analytics with QuickSight dashboards
 
