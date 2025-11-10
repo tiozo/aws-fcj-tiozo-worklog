@@ -227,7 +227,7 @@ Audit trail toàn diện với CloudTrail
 
 ## Phụ Lục
 
-A. Github Repo: https://github.com/tiozo/FCJ-Fraud-Detection-Platform
+A. Gitlab Repo: (Chưa được triển khai lên gitlab, nhưng đã hoàn thiện và nộp cho VPBank Hackathon)
 
 B. Thông tin liên hệ: 
 - Trưởng dự án: Võ Minh Thuận
