@@ -221,7 +221,7 @@ PCI DSS compliant payment processing
 End-to-end encryption and secure credential management
 Comprehensive audit trails with CloudTrail
 
-**Timeline**: 4 months | Team: 5 people | Budget: $83-456/month (Free Tier/Dev-Prod)
+**Timeline**: 4 months | Team: 3 people | Budget: $83-456/month (Free Tier/Dev-Prod)
 
 **This project demonstrates expertise in ML operations, enterprise cloud architecture, and secure payment processing, making it an excellent portfolio piece for ML Engineering, Cloud Architecture, and FinTech roles.**
 
@@ -229,7 +229,7 @@ Comprehensive audit trails with CloudTrail
 
 A. Gitlab repo: (Not available yet, the finished source code has been submitted to VPBank Hackathon)
 
-B. Contacts info: 
+B. Contacts info:  
 - Project Lead: Vo Minh Thuan
 - Email: ```azinz850@gmail.com```
 - WhatsApp/Zalo: ```0908517568```

@@ -7,7 +7,7 @@ pre: "<b> 2. </b>"
 
 # NỀN TẢNG PHÁT HIỆN GIAN LẬN VÀ XỬ LÝ THANH TOÁN ĐƯỢC HỖ TRỢ BỞI ML
 
-### Tóm Tắt Điều Hành
+### Tóm tắt điều hành
 
 Dự án này là một **nền tảng phát hiện gian lận và xử lý thanh toán toàn diện** sử dụng **AWS Services** và **Machine Learning** để cung cấp khả năng xử lý thanh toán an toàn, có thể mở rộng và thông minh với tính năng phát hiện gian lận thời gian thực.
 
@@ -221,7 +221,7 @@ Xử lý thanh toán tuân thủ PCI DSS
 Mã hóa end-to-end và quản lý credential an toàn
 Audit trail toàn diện với CloudTrail
 
-**Timeline**: 4 tháng | Team: 5 người | Budget: $83-456/tháng (Free Tier/Dev-Prod)
+**Timeline**: 4 tháng | Team: 3 người | Budget: $83-456/tháng (Free Tier/Dev-Prod)
 
 **Dự án này chứng minh chuyên môn trong ML operations, kiến trúc cloud doanh nghiệp và xử lý thanh toán an toàn, làm cho nó trở thành một portfolio piece xuất sắc cho các vai trò ML Engineering, Cloud Architecture và FinTech.**
 
@@ -229,7 +229,7 @@ Audit trail toàn diện với CloudTrail
 
 A. Gitlab Repo: (Chưa được triển khai lên gitlab, nhưng đã hoàn thiện và nộp cho VPBank Hackathon)
 
-B. Thông tin liên hệ: 
+B. Thông tin liên hệ:  
 - Trưởng dự án: Võ Minh Thuận
 - Email: ```azinz850@gmail.com```
 - WhatsApp/Zalo: ```0908517568```
