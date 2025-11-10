@@ -5,282 +5,229 @@ chapter: false
 pre: "<b> 2. </b>"
 ---
 
-# AN OCR PLATFORM FOR MATH PROBLEM SUPPORT VIETNAMESE.
+# ML-POWERED FRAUD DETECTION AND PAYMENT PROCESSING PLATFORM
 
 ### Executive Summary
 
-The project is an **open-source** version of Mathpix or Pix2text. That's utilize the **AWS Services** to help the user to host an OCR platform on math problems.
+The project is a **comprehensive fraud detection and payment processing platform** that utilizes **AWS Services** and **Machine Learning** to provide secure, scalable, and intelligent payment processing with real-time fraud detection capabilities.
 
 **Key Highlights:**
 
-🔹 **Effortless Deployment**
+🔹 **Advanced ML-Powered Fraud Detection**
 
-Features a fully automated CI/CD pipeline using AWS CodePipeline and CodeBuild. Once configured, any code push automatically builds, tests, and deploys the entire application stack, making it incredibly simple for anyone to host and maintain their own instance.
+Features XGBoost fraud detection models and Autopilot anomaly detection to identify suspicious transactions in real-time, protecting both merchants and customers from fraudulent activities.
 
-🔹 **Cost-Effective & Self-Hosted**
+🔹 **Scalable Payment Processing Architecture**
 
-Designed for self-hosting on your own AWS account, giving you full control. The architecture leverages a 'pay-as-you-go' model and is optimized to work with the AWS Free Tier, minimizing costs for individual users and small teams.
+Designed with ECS Fargate workers handling payment transactions through a sophisticated pipeline (Validator, Proposer, Worker, Executor, Finalizer), ensuring reliable and scalable payment processing.
 
-🔹 **Intelligent Semantic Search**
+🔹 **Real-time Data Processing & Analytics**
 
-Go beyond simple keyword matching. Our system allows you to search through your entire history of uploaded problems based on their mathematical meaning, helping you find conceptually similar questions instantly.
+Implements streaming data pipelines using Kinesis Firehose and Lambda functions for real-time data aggregation, enabling immediate fraud detection and business intelligence through QuickSight dashboards.
 
-🔹 **Easy Problem Organization & Retrieval**
+🔹 **Enterprise-Grade Security & Compliance**
 
-Never lose track of your work. Assign custom tags to your problems, allowing you to easily filter, find, and revise specific topics or chapters later on. This makes it a powerful tool for studying and knowledge management.
+Multi-layered security architecture featuring AWS WAF, VPC PrivateLink, Secrets Manager, and comprehensive monitoring with CloudWatch and CloudTrail for audit compliance.
 
-🔹 **Modern & Powerful Tech Stack**
+🔹 **Modern Cloud-Native Tech Stack**
 
-    Backend: Java (Amazon Corretto 21) with Spring Boot
-
-    Frontend: React + Vite
-
-    Cloud: AWS EC2 (t3.medium Spot Instance), RDS MySQL, KMS, CloudWatch
-
-    DevOps: AWS CodePipeline, CodeBuild
-
-    AI/Search: Qdrant Vector Database
+    Backend: ECS Fargate with containerized microservices
+    
+    Frontend: Static Web hosted on AWS with CloudFront CDN
+    
+    Cloud: VPC, ALB, API Gateway, Lambda, S3, StyleDB
+    
+    ML/AI: SageMaker, XGBoost, Autopilot, Kinesis Firehose
+    
+    DevOps: GitLab CI/CD with OIDC authentication
 
 ### Problem Statement
 
 **Current Challenges:**
 
-All the current platform for OCR have high fees for each time uses or only free for about 3-4 documents, which isn't a cost efficient for students who needs to uses on their daily basics.  
+Traditional payment processing systems lack real-time fraud detection capabilities, leading to significant financial losses. Many existing solutions are either too expensive for small businesses or lack the sophisticated ML models needed for accurate fraud detection.
 
-As Mathpix require 4.99 USD per month with 1000 PDF files, which may be a waste since each user have different cost. And Pix2Text though advertised as free alternative, the free version lacks of saving feature for revision, and also need to "recharge".  
+Current fraud detection systems often have high false positive rates, blocking legitimate transactions and creating poor customer experiences. Additionally, most systems lack real-time processing capabilities and comprehensive audit trails required for compliance.
 
 **Our Solutions:**
 
-We provide a pay-as-you-go model as you only need to pay for what you uses, or handle the hosting yourself as we provided Infrastructure as Code and the code ready to be built on AWS.  
+We provide an end-to-end ML-powered fraud detection platform with real-time processing capabilities. The system uses advanced machine learning models to accurately identify fraudulent transactions while minimizing false positives.
 
-Provided a monitoring method, for users to view via CloudWatch on AWS, to know the cost for each time they uses the system.
+The platform offers comprehensive monitoring and analytics through CloudWatch and QuickSight, enabling businesses to track performance, costs, and fraud patterns in real-time.
 
 ### Solution Architecture Overview
 
 ![Architecture Overview](/images/2-Proposal/architecture.png)
 
 ```markdown
-1.  **User Request:** The user accesses the frontend of the application, which is a static website hosted in an S3 bucket and served globally via CloudFront for low latency.
+**Frontend User Interactions**
 
-2.  **API Call:** The frontend sends an HTTPS request (containing the uploaded image/PDF) to the backend Java application running on an EC2 instance within a secure VPC.
+1. **User Authentication Flow:** Demo users access the application through a static web frontend hosted on AWS, with requests routed through API Gateway to the security layer for authentication.
 
-3.  **AI Processing (Orchestration):** The Java application orchestrates the AI workflow.
-    * **3a. OCR Request:** The application sends the image data to the **Claude Sonnet 3.7** model in AWS Bedrock. Claude analyzes the image and returns the transcribed mathematical equation as a LaTeX string.
-    * **3b. Embedding Request:** The application sends the extracted LaTeX string to the **Titan Embedding V2** model. Titan converts the string into a numerical vector that captures its semantic meaning.
+2. **Secure Access Management:** API Gateway validates requests through AWS WAF for security filtering, with credentials verified against AWS Secrets Manager.
 
-4.  **Data Storage & Retrieval:** The application interacts with the databases.
-    * **4a. Vector Search:** The generated vector is used to query the **Qdrant Vector Database** to find the IDs of the most similar problems already in the system.
-    * **4b. Data Fetching:** The application uses the IDs from Qdrant to query the **MySQL Database** on RDS to retrieve the full details (problem statement, solution, tags) for each similar problem.
+**Application Layer Processing**
 
-5.  **Temporary Storage:** The initial image/PDF uploaded by the user is stored in a dedicated S3 bucket (`S3_Application`). This serves as a temporary record of the input.
+3. **VPC Network Routing:** Authenticated requests enter the VPC through VPC PrivateLink, with the Application Layer routing requests to the ML Layer for fraud detection predictions.
 
-6.  **Monitoring & Logging:** All application activities, logs, performance metrics, and costs are sent to **AWS CloudWatch**.
-    * **6a. Application Logs:** The EC2 instance sends its logs to CloudWatch.
-    * **6b. S3 Access Logs:** S3 access events (like `PutObject`) are logged for monitoring and auditing.
+4. **Payment Processing Workflow:** Payment requests trigger ECS Fargate Payment Workers that process transactions through specialized handlers (Validator, Proposer, Worker, Executor, Finalizer).
 
-7.  **Bedrock API Calls:** This represents the underlying API calls made from the Java application to the Bedrock service to invoke the Claude and Titan models.
+**Machine Learning Pipeline**
 
-### Pre-Production Workflow (Developer CI/CD)
+5. **Data Aggregation:** Stream Handle Lambda functions collect and aggregate transaction data, storing it in Work History Subnet (StyleDB) and streaming to Kinesis Firehose.
 
-8.  **Developer Push:** An authorized **IAM User** (the developer) pushes new code to a source code repository (e.g., GitHub, AWS CodeCommit).
+6. **ML Model Training and Inference:** Kinesis Firehose streams data to the ML Layer where XGBoost Fraud Detection and Autopilot Anomaly Detection models analyze transactions, with results visualized in QuickSight.
 
-9.  **CI/CD Pipeline Execution:** The code push triggers the **AWS CodePipeline**.
-    * **Source Stage:** Fetches the latest code.
-    * **Build Stage (CodeBuild):** Compiles the Java code, runs tests, and packages the application into a `.jar` artifact. This artifact is then stored securely in an S3 bucket, encrypted using a **KMS key**.
-    * **Deploy Stage:** The pipeline proceeds to the deployment stage.
+**Data Management**
 
-10. **Automated Deployment:**
-    * **AWS CloudFormation** is used to provision or update the entire infrastructure stack (VPC, EC2, RDS, etc.) based on templates. This ensures consistent and repeatable deployments.
-    * The new application artifact from the S3 bucket is deployed to the EC2 instance(s).
+7. **Database Operations:** Temporal Config (ECS on EC2) manages workflow orchestration, with processed payment data stored in StyleDB buckets.
+
+8. **Lambda Data Processing:** API Gateway triggers Lambda functions for data aggregation, with ALB distributing traffic to ECS Execution Roles.
+
+**Monitoring and CI/CD**
+
+9. **System Monitoring:** CloudWatch monitors system health and CloudTrail tracks API calls for audit compliance.
+
+10. **Deployment Pipeline:** GitLab CI/CD with OIDC authentication manages deployments to Infrastructure, Application, and ML repositories.
 ```
 
-### Asssumetion
+### Assumption
 
-Core Assumptions
+**Core Assumptions**
 
 Region: All pricing is based on us-east-1 (N. Virginia).
 
-EC2 Instance: The architecture uses a t3.large Spot Instance, providing an average saving of ~70% compared to On-Demand pricing.
+ECS Fargate: Optimized container sizing (0.25 vCPU, 0.5GB RAM for dev; 1 vCPU, 2GB RAM for prod) with auto-scaling.
 
-Database Instance: An RDS db.t3.micro is used for the MySQL database.
+Database: RDS MySQL with Multi-AZ deployment for production, single-AZ for development.
 
-AWS Free Tier: Applied to the Normal User profile. The High-Usage profile assumes the 12-month Free Tier period for services like RDS has expired.
+ML Models: SageMaker real-time endpoints with optimized instance types (ml.t3.medium for dev, ml.m5.large for prod).
 
-Disclaimer: This analysis is an estimate based on pricing data from October 2025. Prices for AWS services, especially Spot Instances, are subject to change.
+Traffic Assumptions: 10K API calls/month (dev), 1M API calls/month (prod); 100GB data transfer/month (prod).
 
-### Combined Cost Breakdown (t3.large)
+AWS Free Tier: Maximized for development environment. Production assumes post-free-tier pricing.
 
-| Service | Configuration | Normal User (Monthly Cost) | High-Usage User (Monthly Cost) | Notes |
-| :--- | :--- | :--- | :--- | :--- |
-| **Amazon EC2** | `t3.large` Spot Instance | **~$18.22** | **~$18.22** | Core application server cost is fixed. |
-| **Amazon RDS** | `db.t3.micro` (MySQL) | **$0.00** | **~$12.41** | Normal user is covered by Free Tier; High-usage assumes Free Tier expired. |
-| **Amazon S3** | Standard Storage | **$0.00** | **~$0.10** | Storage/requests are minimal and mostly covered by the Free Tier. |
-| **AWS Bedrock** | Claude Sonnet & Titan | **~$0.18** | **~$5.27** | This cost scales directly with the number of pages processed. |
-| **CodePipeline/Build**| CI/CD Pipeline | **$0.00** | **~$0.25** | High-usage user exceeds the free monthly build minutes. |
-| **Data & Monitoring** | CloudWatch & Data Transfer | **$0.00** | **~$0.50** | A nominal fee for increased logging and data egress. |
-| **---** | **---** | **---** | **---** | **---** |
-| **Total Estimated Cost** | | **~$18.40 / month** | **~$36.75 / month** | |
+Cost Optimization: Spot instances where applicable, reserved capacity for predictable workloads, and right-sized resources.
 
-### Combined Cost Breakdown (t3.medium)
+Disclaimer: This analysis is an estimate based on current AWS pricing. Costs may vary significantly based on actual transaction volume, data processing needs, and ML model usage patterns.
 
-| Service                  | Configuration                | Normal User (Monthly Cost) | High-Usage User (Monthly Cost) | Notes                                                                      |
-| :----------------------- | :--------------------------- | :------------------------- | :----------------------------- | :------------------------------------------------------------------------- |
-| **Amazon EC2** | `t3.medium` Spot Instance    | **~$9.11** | **~$9.11** | Core application server cost is fixed and significantly lower than `t3.large`. |
-| **Amazon RDS** | `db.t3.micro` (MySQL)        | **$0.00** | **~$12.41** | Normal user is covered by Free Tier; High-usage assumes Free Tier expired. |
-| **Amazon S3** | Standard Storage             | **$0.00** | **~$0.10** | Storage/requests are minimal and mostly covered by the Free Tier.          |
-| **AWS Bedrock** | Claude Sonnet & Titan        | **~$0.18** | **~$5.27** | This cost scales directly with the number of pages processed.              |
-| **CodePipeline/Build** | CI/CD Pipeline               | **$0.00** | **~$0.25** | High-usage user exceeds the free monthly build minutes.                    |
-| **Data & Monitoring** | CloudWatch & Data Transfer   | **$0.00** | **~$0.50** | A nominal fee for increased logging and data egress.                       |
-| **---** | **---** | **---** | **---** | **---** |
-| **Total Estimated Cost** |                              | **~$9.29 / month** | **~$27.64 / month** |                                                                            |
+### Cost Breakdown
 
-### Conclusion
-
-By switching to a `t3.medium` Spot Instance, the architecture becomes exceptionally affordable.
-
-* For a **Normal User**, the monthly cost is now **under $10**, making it almost negligible.
-* For a **High-Usage User**, the cost is reduced to **well under $30 per month**, a significant saving from the previous estimate.
-
-This change proves that the application can be run with a very minimal financial commitment, maximizing its accessibility.
+| Service | Configuration | Free Tier (Monthly Cost) | Development (Monthly Cost) | Production (Monthly Cost) | Notes |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **CloudFront** | Static Web CDN | **$0.00** (1TB transfer) | **$0.00** | **~$15.00** | Global content delivery |
+| **S3** | Multiple buckets | **$0.00** (5GB storage) | **$0.00** | **~$8.00** | Application, Model, Payment data |
+| **API Gateway** | REST API calls | **$0.00** (1M requests) | **$0.00** | **~$35.00** | Per million API requests |
+| **Application Load Balancer** | Traffic distribution | **~$18.00** | **~$18.00** | **~$18.00** | Fixed monthly cost |
+| **VPC PrivateLink** | Secure connectivity | **~$7.20** | **~$7.20** | **~$7.20** | Per endpoint per hour |
+| **ECS Fargate** | Payment Workers | **~$25.00** | **~$25.00** | **~$120.00** | Optimized container sizing |
+| **EC2** | Temporal Config | **$0.00** (750h t3.micro) | **$0.00** | **~$15.00** | t3.small for production |
+| **Lambda** | Data processing | **$0.00** (1M requests) | **$0.00** | **~$12.00** | Stream processing and aggregation |
+| **SageMaker** | ML model inference | **~$18.00** | **~$18.00** | **~$85.00** | Optimized instance types |
+| **Kinesis Firehose** | Data streaming | **~$3.00** | **~$3.00** | **~$18.00** | Real-time data ingestion |
+| **StyleDB (RDS)** | Database storage | **$0.00** (750h db.t3.micro) | **$0.00** | **~$45.00** | Multi-AZ for production |
+| **Secrets Manager** | Credential storage | **~$2.00** | **~$2.00** | **~$5.00** | Per secret per month |
+| **CloudWatch** | Monitoring & logging | **$0.00** (10 metrics, 5GB) | **$0.00** | **~$25.00** | Comprehensive monitoring |
+| **CloudTrail** | API audit logging | **$0.00** (1 trail free) | **$0.00** | **~$8.00** | Additional data events |
+| **WAF** | Web Application Firewall | **~$8.00** | **~$8.00** | **~$35.00** | Security filtering |
+| **QuickSight** | Data visualization | **$0.00** (1 user free) | **$0.00** | **~$18.00** | Business intelligence |
+| **Data Transfer** | Inter-service communication | **~$2.00** | **~$2.00** | **~$12.00** | VPC and internet egress |
+| **GitLab Runner** | CI/CD compute | **$0.00** (400 min free) | **$0.00** | **~$15.00** | Additional build minutes |
+| **---** | **---** | **---** | **---** | **---** | **---** |
+| **Total Estimated Cost** | | **~$83.20 / month** | **~$83.20 / month** | **~$456.20 / month** | Free Tier = Development cost |
 
 ### Risk Assessment
 
 | Risk Category | Risk Description | Likelihood | Impact | Mitigation Strategy |
 | :--- | :--- | :--- | :--- | :--- |
-| **1. Technical & Operational** | **EC2 Spot Instance Interruption:** The core application server (EC2 Spot Instance) is terminated by AWS due to capacity demands, causing service downtime. | **Medium** | **High** | **- Automated Recovery:** Implement a stateless application design so a new instance can launch and take over seamlessly. <br> **- Diversified Instance Types:** Configure the Spot Fleet/ASG to request multiple instance types (`t3.medium`, `t3a.medium`, `t4g.medium`) to increase the chances of getting an instance. <br> **- Graceful Shutdown:** Implement logic to handle the two-minute interruption notice to save any in-progress work. |
-| | **OCR/Embedding Inaccuracy:** The AWS Bedrock models (Claude, Titan) fail to accurately transcribe or understand complex, handwritten, or poorly formatted equations, leading to incorrect results. | **Medium** | **Medium** | **- Model Selection:** Continuously evaluate and choose the best-performing model versions for the task. <br> **- User Feedback Loop:** Implement a feature allowing users to correct transcriptions, which can be used to fine-tune models or improve pre-processing. <br> **- Image Pre-processing:** Add steps to automatically clean up, sharpen, and standardize images before sending them to the OCR model to improve accuracy. |
-| | **Database Performance Bottleneck:** As the number of saved problems grows, the MySQL database or the Qdrant vector database slows down, impacting search and retrieval times. | **Low** | **Medium** | **- Database Indexing:** Ensure all frequently queried columns in MySQL are properly indexed. <br> **- Qdrant Optimization:** Follow Qdrant best practices for indexing and segment configuration as the dataset grows. <br> **- Caching:** Implement a caching layer (e.g., Redis or an in-memory cache) for frequently accessed problems. |
-| **2. Cost & Financial** | **Unexpected Cost Spikes:** A bug in the application or unintended high usage leads to a massive number of calls to AWS Bedrock, resulting in a significantly higher-than-expected monthly bill. | **Low** | **High** | **- AWS Budgets & Alarms:** Set up strict AWS Budgets to send alerts when costs exceed predefined thresholds (e.g., $50, $100). <br> **- Application-Level Rate Limiting:** Implement logic in the backend to limit the number of documents a single user or IP can process per hour/day to prevent abuse. <br> **- Cost Monitoring:** Regularly review AWS Cost Explorer to understand spending patterns. |
-| | **Spot Instance Price Volatility:** The market price for `t3.medium` Spot Instances increases significantly, raising the fixed operational cost. | **Low** | **Low** | **- Diversified Instance Selection:** As mentioned above, allowing the system to choose from multiple instance types helps find the cheapest available option. <br> **- Fallback to On-Demand (Manual):** For a mission-critical deployment, have a manual plan to switch to an On-Demand instance if Spot prices become unstable for a prolonged period. |
-| **3. Security** | **Insecure IAM Role Configuration:** The IAM roles for the EC2 instance or CodePipeline are overly permissive, granting excessive access to AWS resources (e.g., full S3 access instead of just to a specific bucket). | **Medium** | **High** | **- Principle of Least Privilege:** Strictly define IAM policies to grant only the minimum required permissions. For example, the EC2 role should only have `PutObject` and `GetObject` access to the `S3_Application` bucket. <br> **- Regular Audits:** Use AWS IAM Access Analyzer to regularly review and identify overly permissive roles. |
-| | **Vulnerabilities in Dependencies:** The open-source libraries used in the Java backend (Spring Boot) or React frontend have known security vulnerabilities (e.g., Log4Shell, XSS) that could be exploited. | **High** | **High** | **- Automated Dependency Scanning:** Integrate tools like GitHub Dependabot, `npm audit`, or Snyk directly into the CI/CD pipeline to automatically scan for and flag vulnerable dependencies. <br> **- Regular Patching:** Establish a routine to update dependencies to their latest stable versions. |
-| **4. Project & Usability**| **Complex User Setup:** Non-technical users find the process of setting up an AWS account, configuring IAM roles, and deploying the application too complicated, hindering adoption. | **High**| **Medium**| **- Comprehensive Documentation:** Create clear, step-by-step guides with screenshots and videos. <br> **- "One-Click" Deployment:** Provide a CloudFormation or Terraform template that automates the entire infrastructure setup process with a single command or click. <br> **- Community Support:** Set up a Discord server or GitHub Discussions board for users to ask questions and help each other. |
-| **5. Technical & Performance** | **Slow PDF Processing Time:** PDFs are extremely slow to process. This is caused by the need to **rasterize** each page (PDF -> Image) and then use a slow, expensive **vision OCR model** on that image, leading to a poor user experience. | **High** | **Medium** | **- Hybrid Processing:** Implement a "smart" pre-processor. First, try to extract *digital text* directly from the PDF (using a library like PDFBox). <br> **- If digital text exists:** Send this *text* (not an image) to the model. This is much faster and cheaper. <br> **- If digital text fails (scanned PDF):** Only then fall back to the slow image rasterization and vision OCR path. <br> **- Parallelization:** For multi-page PDFs, process all pages asynchronously in parallel, not one by one. <br> **- UX Management:** For the slow path, provide a clear progress bar and estimated wait time. |
+| **1. ML Model Performance** | **False Positive Rate:** ML models incorrectly flag legitimate transactions as fraudulent, leading to customer dissatisfaction and lost revenue. | **Medium** | **High** | **- Continuous Model Training:** Implement feedback loops to continuously retrain models with new data. <br> **- A/B Testing:** Deploy multiple model versions and compare performance. <br> **- Human Review Process:** Implement manual review for borderline cases. |
+| **2. Scalability** | **Traffic Spikes:** Sudden increases in transaction volume overwhelm the system, causing processing delays or failures. | **Medium** | **High** | **- Auto Scaling:** Configure ECS Fargate and Lambda for automatic scaling. <br> **- Load Testing:** Regular performance testing to identify bottlenecks. <br> **- Circuit Breakers:** Implement circuit breaker patterns to prevent cascade failures. |
+| **3. Security** | **Data Breach:** Sensitive payment and customer data is compromised due to security vulnerabilities. | **Low** | **Critical** | **- Encryption:** End-to-end encryption for all data in transit and at rest. <br> **- Regular Security Audits:** Quarterly penetration testing and vulnerability assessments. <br> **- Compliance:** Maintain PCI DSS compliance for payment processing. |
+| **4. Cost Management** | **Unexpected Cost Spikes:** ML model inference costs or data processing costs exceed budget due to high transaction volumes. | **Medium** | **Medium** | **- Cost Monitoring:** AWS Budgets and alerts for cost thresholds. <br> **- Resource Optimization:** Regular review and optimization of resource usage. <br> **- Reserved Capacity:** Use reserved instances for predictable workloads. |
 
 ### Outcomes
 
 #### Technical Outcomes
 
-Upon completion, the project will deliver the following tangible technical assets:
+Upon completion, the project will deliver:
 
-1.  **A Fully Functional, Self-Hostable Web Application:**
-    * A live, deployed web application accessible via a public URL.
-    * The application will successfully accept image (`.jpg`, `.png`) and PDF uploads, perform OCR on mathematical equations, and return a list of semantically similar problems from its database.
-    * The entire stack will be designed for easy self-hosting by any user with an AWS account.
+1. **Production-Ready Fraud Detection Platform:**
+   * A fully functional web application with real-time fraud detection capabilities
+   * ML models capable of processing thousands of transactions per minute
+   * Comprehensive payment processing pipeline with multiple validation stages
 
-2.  **An Automated & Secure CI/CD Pipeline:**
-    * A production-ready CI/CD pipeline using AWS CodePipeline and CodeBuild.
-    * This pipeline will automatically build, test, and deploy any new code pushed to the main branch, ensuring reliability and simplifying maintenance.
-    * The pipeline will be defined as code (CloudFormation), making it reusable and easy to set up.
+2. **Scalable Cloud Architecture:**
+   * Auto-scaling containerized services using ECS Fargate
+   * Real-time data streaming and processing pipeline
+   * Enterprise-grade security and compliance features
 
-3.  **A Scalable and Cost-Optimized Cloud Architecture:**
-    * A well-architected cloud environment on AWS that is secure, scalable, and highly cost-effective.
-    * Demonstrated successful use of EC2 Spot Instances to reduce compute costs by over 70%.
-    * Effective integration of managed services including RDS for the relational database, S3 for storage, and CloudWatch for monitoring.
-
-4.  **An Open-Source Codebase for Community Contribution:**
-    * A clean, well-documented, and professional open-source project hosted on GitHub.
-    * The repository will include a `README.md` with clear deployment instructions, architectural diagrams, and a guide for future contributors.
+3. **Advanced Analytics and Monitoring:**
+   * Real-time dashboards for fraud detection metrics
+   * Comprehensive audit trails and compliance reporting
+   * Performance monitoring and alerting systems
 
 #### Learning Outcomes
 
-This project will provide deep, hands-on experience across several critical domains in modern software engineering:
+This project provides experience in:
 
-1.  **Deepened Expertise in Cloud Engineering (AWS):**
-    * Proficiency in designing, deploying, and managing a complete cloud application from the ground up.
-    * Practical skills in configuring core AWS services, including VPC networking, IAM security roles, EC2, S3, RDS, and CloudWatch.
+1. **Machine Learning Operations (MLOps):**
+   * Deploying and managing ML models in production
+   * Real-time model inference and continuous training
+   * A/B testing and model performance monitoring
 
-2.  **Practical Experience with AI/ML Model Integration:**
-    * Hands-on experience integrating and orchestrating multiple large language and embedding models (AWS Bedrock) within a traditional backend application.
-    * Understanding the performance trade-offs and cost implications of using different AI models for tasks like OCR and semantic search.
+2. **Enterprise Cloud Architecture:**
+   * Designing secure, scalable payment processing systems
+   * Implementing microservices architecture with containers
+   * Managing complex data pipelines and streaming systems
 
-3.  **Advanced DevOps and Automation Skills:**
-    * Mastery of building a CI/CD pipeline from scratch, including writing build specifications, managing deployment artifacts, and automating infrastructure provisioning using CloudFormation.
-    * Experience in implementing best practices for security and monitoring within an automated deployment workflow.
-
-4.  **Full-Stack Development Proficiency:**
-    * End-to-end development experience across the entire technology stack: building a modern frontend with React, developing a robust backend with Java (Spring Boot), and managing both relational (MySQL) and vector (Qdrant) databases.
-
-5.  **Project Management and Architectural Design:**
-    * Demonstrated ability to take a complex project from concept to completion. This includes performing requirements analysis, designing a system architecture, creating a dataflow, conducting cost analysis, assessing risks, and delivering a final, polished product.
+3. **Security and Compliance:**
+   * Implementing PCI DSS compliant payment processing
+   * Multi-layered security architecture design
+   * Audit trail and compliance reporting systems
 
 ### Portfolio Value
 
-#### AI-Powered Cloud Architecture
+#### Advanced ML Integration
+* **Real-time Fraud Detection:** Demonstrates ability to deploy production ML models for critical business functions
+* **Multi-model Architecture:** Shows expertise in orchestrating multiple ML models (XGBoost, Autopilot) for comprehensive fraud detection
+* **Streaming ML Pipeline:** Implements real-time data processing and model inference at scale
 
-* **Advanced AI Model Integration:** Demonstrates the ability to orchestrate multiple AI services (AWS Bedrock) for a complex workflow, combining a vision-based OCR model (Claude) with a semantic embedding model (Titan).
-* **Specialized Search Implementation:** Utilizes a dedicated vector database (Qdrant) to implement high-speed, accurate semantic search, a core component of modern AI applications.
-* **Scalable, Decoupled Design:** Features a robust cloud-native architecture using AWS services, designed to handle processing-intensive tasks efficiently.
+#### Enterprise Architecture
+* **Payment Processing Expertise:** Shows understanding of complex financial transaction processing
+* **Microservices Design:** Demonstrates modern containerized architecture with ECS Fargate
+* **Security-First Approach:** Implements enterprise-grade security with WAF, VPC, and comprehensive monitoring
 
-#### DevSecOps & Automation
-
-* **Automated CI/CD Pipeline:** Implements a full CI/CD pipeline with AWS CodePipeline and CodeBuild to automatically build, test, and deploy the application, ensuring consistency and reliability.
-* **Infrastructure as Code (IaC):** The entire AWS infrastructure is defined in CloudFormation, enabling automated, repeatable, and secure deployments for any user.
-* **Comprehensive Monitoring:** Leverages AWS CloudWatch for detailed logging and monitoring of all application and infrastructure components.
-* **Built-in Security:** Uses AWS KMS for encrypting build artifacts and enforces the principle of least privilege with finely-tuned IAM roles.
-
-#### AWS Proficiency & Cost Optimization
-
-* **Deep AWS Integration:** Integrates over 10 core AWS services, including EC2, S3, RDS, Bedrock, CodePipeline, CloudWatch, KMS, and IAM, demonstrating a broad and practical knowledge of the AWS ecosystem.
-* **Extreme Cost-Efficiency:** The architecture is meticulously designed for minimal cost, leveraging **EC2 Spot Instances** to reduce compute costs by over 70%.
-* **Free Tier Maximization:** The design is optimized to utilize the AWS Free Tier, bringing the monthly cost for normal usage to **under $10**.
-
-#### Key Differentiators
-
-* **Production-Grade AI Workflow:** This isn't just a simple API call; it's a multi-step AI chain that mimics real-world production systems for OCR and semantic analysis.
-* **Focus on Cost-Effective Self-Hosting:** A key feature is the ability for anyone to deploy a powerful, personal AI tool on their own cloud account for a fraction of the cost of commercial services.
-* **Reusable Deployment Patterns:** The project's "one-click" CloudFormation deployment demonstrates a high level of DevOps maturity and makes the technology accessible to a wider audience.
-* **Efficient Hybrid Data Storage:** Successfully combines a traditional relational database (MySQL) for structured data with a modern vector database (Qdrant) for high-performance AI search.
-
+#### DevOps and Automation
+* **GitLab CI/CD Integration:** Advanced deployment pipeline with OIDC authentication
+* **Infrastructure as Code:** Automated deployment and scaling capabilities
+* **Comprehensive Monitoring:** Full observability with CloudWatch, CloudTrail, and QuickSight
 
 ### Conclusion
-The project is an **open-source, self-hostable AI-powered tool** that demonstrates excellence in modern cloud engineering and DevOps, showcasing:
 
-#### **AI-Powered Cloud Architecture**
+This project demonstrates a **production-grade ML-powered fraud detection and payment processing platform** showcasing:
 
-Advanced AI model orchestration (AWS Bedrock: Claude & Titan)
+#### **Advanced ML Operations**
+Real-time fraud detection with XGBoost and Autopilot models
+Streaming data pipelines with Kinesis Firehose
+Comprehensive analytics with QuickSight dashboards
 
-High-performance semantic search with a vector database (Qdrant)
+#### **Enterprise Architecture**
+Scalable payment processing with ECS Fargate workers
+Multi-layered security with WAF and VPC PrivateLink
+High-availability design with auto-scaling capabilities
 
-Scalable, stateless application design for high availability
+#### **Security and Compliance**
+PCI DSS compliant payment processing
+End-to-end encryption and secure credential management
+Comprehensive audit trails with CloudTrail
 
-Efficient hybrid data storage (MySQL + Vector DB)
+**Timeline**: 4 months | Team: 5 people | Budget: $83-456/month (Free Tier/Dev-Prod)
 
-#### **DevSecOps Implementation**
-
-Fully automated CI/CD pipeline (CodePipeline + CodeBuild)
-
-Infrastructure as Code for "one-click" deployment (CloudFormation)
-
-KMS encryption for all build artifacts and sensitive data
-
-Comprehensive monitoring and logging (CloudWatch)
-
-Security-first design with least-privilege IAM roles
-
-#### **Cost-Optimized Design**
-
-Extreme cost-efficiency (under $10/month for normal usage)
-
-EC2 Spot Instances for over 70% reduction in compute costs
-
-Maximized use of the AWS Free Tier
-
-#### **AWS Expertise**
-
-Deep, practical integration with 10+ core AWS services
-
-Best practices in cloud security and cost management
-
-Robust, scalable, and resilient architecture
-
-**Timeline**: 2 months | Team: 3 people | Budget: ~$9-10/month (Normal Usage)
-
-**This project demonstrates the end-to-end implementation of a production-grade AI application on a secure, cost-effective, and fully automated cloud infrastructure, making it a strong portfolio piece for Cloud Engineering, AI/ML Engineering, and DevOps roles.**
+**This project demonstrates expertise in ML operations, enterprise cloud architecture, and secure payment processing, making it an excellent portfolio piece for ML Engineering, Cloud Architecture, and FinTech roles.**
 
 ## Appendices
 
-A. Github Repo: https://github.com/tiozo/FCJ-Problem_Suggest
+A. Github Repo: https://github.com/tiozo/FCJ-Fraud-Detection-Platform
 
 B. Contacts info: 
 - Project Lead: Vo Minh Thuan

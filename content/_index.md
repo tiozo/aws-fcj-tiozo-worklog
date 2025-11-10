@@ -14,7 +14,7 @@ Email: azinz850@gmail.com
 University: FPT University  
 Major: Information System  
 Class: FCJ - FPTU FA25  
-Intership company: First AI Cloud Journey x OJT FPTU  
+Intership company: AMAZON WEB SERVICES VIETNAM COMPANY LIMITED  
 Internship Position: FCJ Intern  
 Duration: From 8/9/2025 to 12/2025
 

@@ -12,3 +12,5 @@ Week 4: [Continue to study AWS, and task for the project.](1.4-Week%204%20Worklo
 Week 5: [Ending Phase 1 of the project, preparation for exams](1.5-Week%205%20Worklog/)  
 Week 6: [Exam Revision](1.6-Week%206%20Worklog/)  
 Week 7: [VPBank Hackathon preparation and Exam Revision](1.7-Week%207%20Worklog/)
+Week 8: [Exam week](1.8-Week%208%20Worklog/)
+Week 9: [VPBank Hackathon - Round 2 Prototype development](1.9-Week%209%20Worklog/)
