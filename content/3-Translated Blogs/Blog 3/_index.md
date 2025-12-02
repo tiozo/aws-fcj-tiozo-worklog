@@ -1,8 +1,8 @@
 ---
-title: "Translated Blogs"
-weight: 1
+title: "Blog 3"
+weight: 3
 chapter: false
-pre: "<b> 2. </b>"
+pre: "<b> 3. </b>"
 ---
 
 # Digitizing Batch Records in Pharmaceutical Manufacturing with Aizon

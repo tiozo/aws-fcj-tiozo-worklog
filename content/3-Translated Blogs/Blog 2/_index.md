@@ -1,6 +1,6 @@
 ---
-title: "Translated Blogs"
-weight: 1
+title: "Blog 2"
+weight: 2
 chapter: false
 pre: "<b> 2. </b>"
 ---

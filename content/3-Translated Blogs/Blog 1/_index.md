@@ -1,8 +1,8 @@
 ---
-title: "Translated Blogs"
+title: "Blog 1"
 weight: 1
 chapter: false
-pre: "<b> 2. </b>"
+pre: "<b> 1. </b>"
 ---
 
 # Using Amazon GuardDuty Malware Protection to scan uploads to Amazon S3

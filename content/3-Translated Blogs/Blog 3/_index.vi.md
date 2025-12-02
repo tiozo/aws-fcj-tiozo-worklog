@@ -1,8 +1,8 @@
 ---
-title: "Translated Blogs"
+title: "Blog 3"
 weight: 1
 chapter: false
-pre: "<b> 2. </b>"
+pre: "<b> 3. </b>"
 ---
 
 ## Từ PoC đến tác động: Một kế hoạch chi tiết để thành công

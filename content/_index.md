@@ -20,8 +20,8 @@ Duration: From 8/9/2025 to 12/2025
 
 ## Table of Contents
 1. [Worklog](1-worklog/)
-2. [Proposal](2-Proposal/)
-3. [Translated Blog](3-translated-blog/)
+2. [Proposal](2-proposal/)
+3. [Translated Blogs](3-translated-blogs/)
 4. [Events Participated](4-events-participated/)
 5. [Workshop](5-workshop/)
 6. [Self-Assessment](6-self-assessment/)
