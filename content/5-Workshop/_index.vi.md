@@ -1,5 +1,5 @@
 ---
-title: "Triển khai ML Model lên Amazon SageMaker"
+title: "5. Workshop"
 date: "`date +'%Y-%m-%d'`"
 weight: 5
 chapter: false

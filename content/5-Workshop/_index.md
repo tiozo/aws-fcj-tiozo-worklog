@@ -1,5 +1,5 @@
 ---
-title: "Deploy ML Model to Amazon SageMaker"
+title: "5. Workshop"
 date: "`date +'%Y-%m-%d'`"
 weight: 5
 chapter: false
