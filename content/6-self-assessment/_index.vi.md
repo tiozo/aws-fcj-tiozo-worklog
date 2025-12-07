@@ -1,11 +1,9 @@
 ---
-title: "Tự đánh giá"
+title: "6. Self-Assessment"
 date: "`date +'%Y-%m-%d'`"
 weight: 6
 chapter: false
 ---
-
-# Tự đánh giá
 
 Trong thời gian thực tập tại Amazon Web Services Vietnam Company Limited từ ngày 8/9/2025 đến 12/2025, tôi đã có cơ hội học hỏi, thực hành và áp dụng kiến thức đã học ở trường vào môi trường làm việc thực tế.
 

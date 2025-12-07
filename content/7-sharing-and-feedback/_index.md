@@ -1,11 +1,9 @@
 ---
-title: "Sharing and Feedback"
+title: "7. Sharing and Feedback"
 date: "`date +'%Y-%m-%d'`"
 weight: 7
 chapter: false
 ---
-
-# Sharing and Feedback
 
 ## Overall Evaluation
 

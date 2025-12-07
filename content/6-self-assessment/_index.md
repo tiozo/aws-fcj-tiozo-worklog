@@ -1,11 +1,9 @@
 ---
-title: "Self-Assessment"
+title: "6. Self-Assessment"
 date: "`date +'%Y-%m-%d'`"
 weight: 6
 chapter: false
 ---
-
-# Self-Assessment
 
 During my internship at Amazon Web Services Vietnam Company Limited from September 8, 2025 to December 2025, I had the opportunity to learn, practice, and apply the knowledge acquired in school to a real-world working environment.
 

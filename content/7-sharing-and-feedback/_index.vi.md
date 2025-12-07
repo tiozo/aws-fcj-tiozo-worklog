@@ -1,11 +1,9 @@
 ---
-title: "Chia sẻ và Phản hồi"
+title: "7. Sharing and Feedback"
 date: "`date +'%Y-%m-%d'`"
 weight: 7
 chapter: false
 ---
-
-# Chia sẻ và Phản hồi
 
 ## Đánh Giá Tổng Thể
 
