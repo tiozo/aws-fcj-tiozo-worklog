@@ -17,9 +17,9 @@ Dự án này là một **nền tảng phát hiện gian lận và xử lý than
 
 Tích hợp các mô hình phát hiện gian lận XGBoost và phát hiện bất thường Autoencoder để nhận diện các giao dịch đáng ngờ trong thời gian thực, bảo vệ cả người bán và khách hàng khỏi các hoạt động gian lận.
 
-🔹 **Kiến Trúc Xử Lý Thanh Toán Có Thể Mở Rộng**
+🔹 **Kiến Trúc Xử Lý Thanh Toán Hybrid Cloud**
 
-Được thiết kế với các worker ECS Fargate xử lý giao dịch thanh toán thông qua một pipeline phức tạp (Validator, Proposer, Worker, Executor, Finalizer), đảm bảo xử lý thanh toán đáng tin cậy và có thể mở rộng.
+Được thiết kế với các server backend on-premise xử lý giao dịch thanh toán thông qua một pipeline phức tạp (Validator, Proposer, Worker, Executor, Finalizer), được tích hợp an toàn với các dịch vụ AWS cloud thông qua Site-to-Site VPN.
 
 🔹 **Xử Lý Dữ Liệu Thời Gian Thực & Phân Tích**
 
@@ -31,11 +31,11 @@ Kiến trúc bảo mật đa lớp bao gồm AWS WAF, VPC PrivateLink, Secrets M
 
 🔹 **Tech Stack Cloud-Native Hiện Đại**
 
-    Backend: ECS Fargate với microservices được container hóa
+    Backend: Server on-premise với kiến trúc thanh toán modular
     
     Frontend: Static Web được host trên AWS với CloudFront CDN
     
-    Cloud: VPC, ALB, API Gateway, Lambda, S3, StyleDB
+    Cloud: VPC, Site-to-Site VPN, API Gateway, Lambda, S3
     
     ML/AI: SageMaker, XGBoost, Autoencoder, Kinesis Firehose
     
@@ -51,7 +51,7 @@ Các hệ thống phát hiện gian lận hiện tại thường có tỷ lệ d
 
 **Giải Pháp Của Chúng Tôi:**
 
-Chúng tôi cung cấp một nền tảng phát hiện gian lận được hỗ trợ bởi ML từ đầu đến cuối với khả năng xử lý thời gian thực. Hệ thống sử dụng các mô hình machine learning tiên tiến để nhận diện chính xác các giao dịch gian lận trong khi giảm thiểu dương tính giả.
+Chúng tôi cung cấp một nền tảng phát hiện gian lận hybrid cloud được hỗ trợ bởi ML kết hợp xử lý thanh toán on-premise với khả năng ML của AWS cloud. Hệ thống sử dụng các mô hình machine learning tiên tiến được triển khai trên AWS để nhận diện chính xác các giao dịch gian lận trong khi duy trì xử lý thanh toán trên hạ tầng on-premise an toàn.
 
 Nền tảng cung cấp giám sát và phân tích toàn diện thông qua CloudWatch và QuickSight, cho phép các doanh nghiệp theo dõi hiệu suất, chi phí và các mẫu gian lận trong thời gian thực.
 
@@ -73,15 +73,15 @@ Người dùng Internet truy cập ứng dụng web:
 
 #### 2. Luồng Tích Hợp On-Premise (Private Integration)
 
-Kết nối bảo mật từ hệ thống Server vật lý hiện có lên AWS:
+Kết nối bảo mật từ backend thanh toán on-premise lên AWS:
 
-**(5) VPN Tunnel:** Server từ dưới Data Center gửi dữ liệu qua đường truyền mã hóa Site-to-Site VPN.
+**(5) VPN Tunnel:** Các server thanh toán on-premise gửi dữ liệu giao dịch qua đường truyền mã hóa Site-to-Site VPN.
 
 **(6) Private Network Routing:** Traffic đi vào AWS VPC, được điều hướng qua Network Interface nội bộ.
 
-**(4) VPC PrivateLink:** Traffic đi qua VPC Interface Endpoint. Đây là chốt chặn giúp server on-premise "nhìn thấy" và giao tiếp với dịch vụ AWS như thể đang ở trong mạng nội bộ.
+**(4) VPC PrivateLink:** Traffic đi qua VPC Interface Endpoint, cho phép backend on-premise giao tiếp với các dịch vụ AWS ML một cách an toàn.
 
-**(8) Internal API Call:** Từ PrivateLink, request được chuyển tiếp an toàn vào lớp API Gateway (mà không cần đi vòng ra Internet công cộng).
+**(8) Internal API Call:** Từ PrivateLink, request được chuyển tiếp an toàn vào API Gateway để thực hiện ML inference (mà không cần đi qua Internet công cộng).
 
 #### 3. Luồng Xử Lý Dữ Liệu & Machine Learning (Core Logic)
 
@@ -114,13 +114,13 @@ Quy trình tự động hóa cập nhật mã nguồn:
 
 Vùng: Tất cả giá cả dựa trên us-east-1 (N. Virginia).
 
-Kiến Trúc Serverless: API handler dựa trên Lambda với khả năng auto-scaling.
+Kiến Trúc Hybrid: Backend thanh toán on-premise được tích hợp với các dịch vụ AWS serverless ML thông qua Site-to-Site VPN.
 
 Mô Hình ML: SageMaker real-time endpoint với loại instance tối ưu (ml.t3.medium cho dev, ml.m5.xlarge cho prod).
 
 Giả Định Traffic: 10K API call/tháng (dev), 1M API call/tháng (prod); 50GB truyền dữ liệu/tháng (prod).
 
-Tích Hợp On-Premise: Site-to-Site VPN cho kết nối an toàn từ data center đến AWS VPC.
+Backend On-Premise: Các server xử lý thanh toán (Validator, Proposer, Worker, Executor, Finalizer) chạy on-premise, kết nối với AWS qua Site-to-Site VPN để thực hiện ML inference.
 
 AWS Free Tier: Tối đa hóa cho môi trường phát triển. Production giả định giá sau free-tier.
 
@@ -155,7 +155,10 @@ Tuyên Bố Miễn Trừ: Phân tích này là ước tính dựa trên giá AWS
 
 | Danh Mục Rủi Ro | Mô Tả Rủi Ro | Khả Năng | Tác Động | Chiến Lược Giảm Thiểu |
 | :--- | :--- | :--- | :--- | :--- |
-| **1. Hiệu Suất Mô Hình ML** | **Tỷ Lệ Dương Tính Giả:** Các mô hình ML nhận diện sai các giao dịch hợp pháp là gian lận, dẫn đến sự không hài lòng của khách hàng và mất doanh thu. | **Trung Bình** | **Cao** | **- Huấn Luyện Mô Hình Liên Tục:** Triển khai feedback loop để liên tục huấn luyện lại mô hình với dữ liệu mới. <br> **- A/B Testing:** Triển khai nhiều phiên bản mô hình và so sánh hiệu suất. <br> **- Quy Trình Xem Xét Thủ Công:** Triển khai xem xét thủ công cho các trường hợp biên. |
+| **1. Hiệu Suất Mô Hình ML** | **Tỷ Lệ Dương Tính Giả:** Các mô hình ML nhận diện sai các giao dịch hợp pháp là gian lận, dẫn đến sự không hài lòng của khách hàng và mất doanh thu. | **Trung Bình** | **Cao** | **- Huấn Luyện Mô Hình Liên Tục:** Triển khai feedback loop để liên tục huấn luyện lại mô hình với dữ liệu mới. <br> **- A/B Testing:** Triển khai nhiều phiên bản mô hình và so sánh hiệu suất. <br> **- Quy Trình Xem Xét Thủ Công:** Triển khai xem xét thủ công cho các trường hợp biên giới. |
+| **2. Khả Năng Mở Rộng** | **Tăng Đột Biến Traffic:** Sự gia tăng đột ngột trong khối lượng giao dịch làm quá tải hệ thống, gây ra độ trễ xử lý hoặc lỗi. | **Trung Bình** | **Cao** | **- Auto Scaling:** Cấu hình Lambda và SageMaker để tự động mở rộng. <br> **- Load Testing:** Kiểm tra hiệu suất thường xuyên để xác định điểm nghẽn. <br> **- Circuit Breakers:** Triển khai mẫu circuit breaker để ngăn chặn lỗi cascade. <br> **- Dung Lượng On-Premise:** Mở rộng server backend thanh toán dựa trên tải. |
+| **3. Bảo Mật** | **Vi Phạm Dữ Liệu:** Dữ liệu thanh toán và khách hàng nhạy cảm bị xâm phạm do các lỗ hổng bảo mật. | **Thấp** | **Nghiêm Trọng** | **- Mã Hóa:** Mã hóa end-to-end cho tất cả dữ liệu trong quá trình truyền và lưu trữ. <br> **- Kiểm Tra Bảo Mật Thường Xuyên:** Kiểm tra thâm nhập và đánh giá lỗ hổng hàng quý. <br> **- Tuân Thủ:** Duy trì tuân thủ PCI DSS cho xử lý thanh toán. |
+| **4. Quản Lý Chi Phí** | **Tăng Đột Biến Chi Phí:** Chi phí inference mô hình ML hoặc chi phí xử lý dữ liệu vượt quá ngân sách do khối lượng giao dịch cao. | **Trung Bình** | **Trung Bình** | **- Giám Sát Chi Phí:** AWS Budgets và cảnh báo cho ngưỡng chi phí. <br> **- Tối Ưu Tài Nguyên:** Xem xét và tối ưu hóa việc sử dụng tài nguyên thường xuyên. <br> **- Reserved Capacity:** Sử dụng reserved instance cho workload có thể dự đoán. | mới. <br> **- A/B Testing:** Triển khai nhiều phiên bản mô hình và so sánh hiệu suất. <br> **- Quy Trình Xem Xét Thủ Công:** Triển khai xem xét thủ công cho các trường hợp biên. |
 | **2. Khả Năng Mở Rộng** | **Tăng Đột Biến Traffic:** Sự gia tăng đột ngột trong khối lượng giao dịch làm quá tải hệ thống, gây ra độ trễ xử lý hoặc lỗi. | **Trung Bình** | **Cao** | **- Auto Scaling:** Cấu hình ECS Fargate và Lambda cho auto scaling. <br> **- Load Testing:** Kiểm tra hiệu suất thường xuyên để xác định bottleneck. <br> **- Circuit Breakers:** Triển khai pattern circuit breaker để ngăn cascade failure. |
 | **3. Bảo Mật** | **Vi Phạm Dữ Liệu:** Dữ liệu thanh toán và khách hàng nhạy cảm bị xâm phạm do lỗ hổng bảo mật. | **Thấp** | **Nghiêm Trọng** | **- Mã Hóa:** Mã hóa end-to-end cho tất cả dữ liệu trong quá trình truyền và lưu trữ. <br> **- Audit Bảo Mật Thường Xuyên:** Kiểm tra penetration testing và đánh giá lỗ hổng hàng quý. <br> **- Tuân Thủ:** Duy trì tuân thủ PCI DSS cho xử lý thanh toán. |
 | **4. Quản Lý Chi Phí** | **Tăng Đột Biến Chi Phí:** Chi phí suy luận mô hình ML hoặc chi phí xử lý dữ liệu vượt quá ngân sách do khối lượng giao dịch cao. | **Trung Bình** | **Trung Bình** | **- Giám Sát Chi Phí:** AWS Budgets và cảnh báo cho ngưỡng chi phí. <br> **- Tối Ưu Hóa Tài Nguyên:** Xem xét và tối ưu hóa sử dụng tài nguyên thường xuyên. <br> **- Reserved Capacity:** Sử dụng reserved instance cho workload có thể dự đoán. |
@@ -171,10 +174,10 @@ Khi hoàn thành, dự án sẽ cung cấp:
    * Các mô hình ML có khả năng xử lý hàng nghìn giao dịch mỗi phút
    * Pipeline xử lý thanh toán toàn diện với nhiều giai đoạn xác thực
 
-2. **Kiến Trúc Cloud Có Thể Mở Rộng:**
-   * Các dịch vụ được container hóa auto-scaling sử dụng ECS Fargate
+2. **Kiến Trúc Hybrid Cloud:**
+   * Xử lý thanh toán on-premise với tích hợp AWS ML
    * Pipeline xử lý và streaming dữ liệu thời gian thực
-   * Các tính năng bảo mật và tuân thủ cấp doanh nghiệp
+   * Bảo mật cấp doanh nghiệp với VPN và PrivateLink
 
 3. **Phân Tích và Giám Sát Tiên Tiến:**
    * Dashboard thời gian thực cho các metric phát hiện gian lận
@@ -190,9 +193,9 @@ Dự án này cung cấp kinh nghiệm trong:
    * Suy luận mô hình thời gian thực và huấn luyện liên tục
    * A/B testing và giám sát hiệu suất mô hình
 
-2. **Kiến Trúc Cloud Doanh Nghiệp:**
-   * Thiết kế hệ thống xử lý thanh toán an toàn, có thể mở rộng
-   * Triển khai kiến trúc microservices với container
+2. **Kiến Trúc Hybrid Cloud:**
+   * Thiết kế hệ thống xử lý thanh toán hybrid cloud an toàn
+   * Triển khai các mẫu tích hợp on-premise to cloud
    * Quản lý pipeline dữ liệu phức tạp và hệ thống streaming
 
 3. **Bảo Mật và Tuân Thủ:**
@@ -207,10 +210,10 @@ Dự án này cung cấp kinh nghiệm trong:
 * **Kiến Trúc Đa Mô Hình:** Thể hiện chuyên môn trong việc orchestrate nhiều mô hình ML (XGBoost, Autoencoder) để phát hiện gian lận toàn diện
 * **Pipeline ML Streaming:** Triển khai xử lý dữ liệu thời gian thực và suy luận mô hình ở quy mô lớn
 
-#### Kiến Trúc Doanh Nghiệp
-* **Chuyên Môn Xử Lý Thanh Toán:** Thể hiện hiểu biết về xử lý giao dịch tài chính phức tạp
-* **Thiết Kế Microservices:** Chứng minh kiến trúc container hóa hiện đại với ECS Fargate
-* **Phương Pháp Security-First:** Triển khai bảo mật cấp doanh nghiệp với WAF, VPC và giám sát toàn diện
+#### Kiến Trúc Hybrid Cloud
+* **Chuyên Môn Xử Lý Thanh Toán:** Thể hiện hiểu biết về xử lý giao dịch tài chính phức tạp on-premise
+* **Thiết Kế Tích Hợp Cloud:** Chứng minh kiến trúc hybrid cloud an toàn với VPN và PrivateLink
+* **Phương Pháp Security-First:** Triển khai bảo mật cấp doanh nghiệp với WAF, VPC, mã hóa VPN và giám sát toàn diện
 
 #### DevOps và Tự Động Hóa
 * **Tích Hợp GitLab CI/CD:** Pipeline triển khai tiên tiến với xác thực OIDC
@@ -226,10 +229,10 @@ Phát hiện gian lận thời gian thực với các mô hình XGBoost và Auto
 Pipeline dữ liệu streaming với Kinesis Firehose
 Phân tích toàn diện với dashboard QuickSight
 
-#### **Kiến Trúc Doanh Nghiệp**
-Xử lý thanh toán có thể mở rộng với ECS Fargate workers
-Bảo mật đa lớp với WAF và VPC PrivateLink
-Thiết kế high-availability với khả năng auto-scaling
+#### **Kiến Trúc Hybrid Cloud**
+Xử lý thanh toán on-premise với tích hợp AWS ML
+Bảo mật đa lớp với VPN, WAF và VPC PrivateLink
+Thiết kế high-availability với khả năng auto-scaling ML services
 
 #### **Bảo Mật và Tuân Thủ**
 Xử lý thanh toán tuân thủ PCI DSS
@@ -242,7 +245,7 @@ Audit trail toàn diện với CloudTrail
 
 ## Phụ Lục
 
-A. Gitlab Repo: (Chưa được triển khai lên gitlab, nhưng đã hoàn thiện và nộp cho VPBank Hackathon)
+A. Gitlab repo: (Chưa có sẵn, mã nguồn hoàn chỉnh đã được nộp cho VPBank Hackathon)
 
 B. Thông tin liên hệ:  
 - Trưởng dự án: Võ Minh Thuận

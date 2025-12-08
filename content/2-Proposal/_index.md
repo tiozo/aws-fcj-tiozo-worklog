@@ -17,9 +17,9 @@ The project is a **comprehensive fraud detection and payment processing platform
 
 Features XGBoost fraud detection models and Autoencoder anomaly detection to identify suspicious transactions in real-time, protecting both merchants and customers from fraudulent activities.
 
-🔹 **Scalable Payment Processing Architecture**
+🔹 **Hybrid Cloud Payment Processing Architecture**
 
-Designed with ECS Fargate workers handling payment transactions through a sophisticated pipeline (Validator, Proposer, Worker, Executor, Finalizer), ensuring reliable and scalable payment processing.
+Designed with on-premise backend servers handling payment transactions through a sophisticated pipeline (Validator, Proposer, Worker, Executor, Finalizer), securely integrated with AWS cloud services via Site-to-Site VPN.
 
 🔹 **Real-time Data Processing & Analytics**
 
@@ -31,11 +31,11 @@ Multi-layered security architecture featuring AWS WAF, VPC PrivateLink, Secrets 
 
 🔹 **Modern Cloud-Native Tech Stack**
 
-    Backend: ECS Fargate with containerized microservices
+    Backend: On-premise servers with modular payment architecture
     
     Frontend: Static Web hosted on AWS with CloudFront CDN
     
-    Cloud: VPC, ALB, API Gateway, Lambda, S3, StyleDB
+    Cloud: VPC, Site-to-Site VPN, API Gateway, Lambda, S3
     
     ML/AI: SageMaker, XGBoost, Autoencoder, Kinesis Firehose
     
@@ -51,7 +51,7 @@ Current fraud detection systems often have high false positive rates, blocking l
 
 **Our Solutions:**
 
-We provide an end-to-end ML-powered fraud detection platform with real-time processing capabilities. The system uses advanced machine learning models to accurately identify fraudulent transactions while minimizing false positives.
+We provide a hybrid cloud ML-powered fraud detection platform combining on-premise payment processing with AWS cloud ML capabilities. The system uses advanced machine learning models deployed on AWS to accurately identify fraudulent transactions while maintaining payment processing on secure on-premise infrastructure.
 
 The platform offers comprehensive monitoring and analytics through CloudWatch and QuickSight, enabling businesses to track performance, costs, and fraud patterns in real-time.
 
@@ -73,15 +73,15 @@ Internet users access the web application:
 
 #### 2. On-Premise Integration Flow (Private Integration)
 
-Secure connection from existing physical servers to AWS:
+Secure connection from on-premise payment backend to AWS:
 
-**(5) VPN Tunnel:** Servers from the Data Center send data through encrypted Site-to-Site VPN.
+**(5) VPN Tunnel:** On-premise payment servers send transaction data through encrypted Site-to-Site VPN.
 
 **(6) Private Network Routing:** Traffic enters AWS VPC, routed through internal Network Interface.
 
-**(4) VPC PrivateLink:** Traffic goes through VPC Interface Endpoint, allowing on-premise servers to communicate with AWS services as if they were on the internal network.
+**(4) VPC PrivateLink:** Traffic goes through VPC Interface Endpoint, allowing on-premise backend to communicate with AWS ML services securely.
 
-**(8) Internal API Call:** From PrivateLink, requests are securely forwarded to API Gateway layer (without going through the public Internet).
+**(8) Internal API Call:** From PrivateLink, requests are securely forwarded to API Gateway for ML inference (without going through the public Internet).
 
 #### 3. Data Processing & Machine Learning Flow (Core Logic)
 
@@ -114,13 +114,13 @@ Automated source code update process:
 
 Region: All pricing is based on us-east-1 (N. Virginia).
 
-Serverless Architecture: Lambda-based API handlers with auto-scaling capabilities.
+Hybrid Architecture: On-premise payment backend integrated with AWS serverless ML services via Site-to-Site VPN.
 
 ML Models: SageMaker real-time endpoints with optimized instance types (ml.t3.medium for dev, ml.m5.xlarge for prod).
 
 Traffic Assumptions: 10K API calls/month (dev), 1M API calls/month (prod); 50GB data transfer/month (prod).
 
-On-Premise Integration: Site-to-Site VPN for secure connectivity from data center to AWS VPC.
+On-Premise Backend: Payment processing servers (Validator, Proposer, Worker, Executor, Finalizer) running on-premise, connected to AWS via Site-to-Site VPN for ML inference.
 
 AWS Free Tier: Maximized for development environment. Production assumes post-free-tier pricing.
 
@@ -156,7 +156,7 @@ Disclaimer: This analysis is an estimate based on current AWS pricing. Costs may
 | Risk Category | Risk Description | Likelihood | Impact | Mitigation Strategy |
 | :--- | :--- | :--- | :--- | :--- |
 | **1. ML Model Performance** | **False Positive Rate:** ML models incorrectly flag legitimate transactions as fraudulent, leading to customer dissatisfaction and lost revenue. | **Medium** | **High** | **- Continuous Model Training:** Implement feedback loops to continuously retrain models with new data. <br> **- A/B Testing:** Deploy multiple model versions and compare performance. <br> **- Human Review Process:** Implement manual review for borderline cases. |
-| **2. Scalability** | **Traffic Spikes:** Sudden increases in transaction volume overwhelm the system, causing processing delays or failures. | **Medium** | **High** | **- Auto Scaling:** Configure ECS Fargate and Lambda for automatic scaling. <br> **- Load Testing:** Regular performance testing to identify bottlenecks. <br> **- Circuit Breakers:** Implement circuit breaker patterns to prevent cascade failures. |
+| **2. Scalability** | **Traffic Spikes:** Sudden increases in transaction volume overwhelm the system, causing processing delays or failures. | **Medium** | **High** | **- Auto Scaling:** Configure Lambda and SageMaker for automatic scaling. <br> **- Load Testing:** Regular performance testing to identify bottlenecks. <br> **- Circuit Breakers:** Implement circuit breaker patterns to prevent cascade failures. <br> **- On-Premise Capacity:** Scale payment backend servers based on load. |
 | **3. Security** | **Data Breach:** Sensitive payment and customer data is compromised due to security vulnerabilities. | **Low** | **Critical** | **- Encryption:** End-to-end encryption for all data in transit and at rest. <br> **- Regular Security Audits:** Quarterly penetration testing and vulnerability assessments. <br> **- Compliance:** Maintain PCI DSS compliance for payment processing. |
 | **4. Cost Management** | **Unexpected Cost Spikes:** ML model inference costs or data processing costs exceed budget due to high transaction volumes. | **Medium** | **Medium** | **- Cost Monitoring:** AWS Budgets and alerts for cost thresholds. <br> **- Resource Optimization:** Regular review and optimization of resource usage. <br> **- Reserved Capacity:** Use reserved instances for predictable workloads. |
 
@@ -171,10 +171,10 @@ Upon completion, the project will deliver:
    * ML models capable of processing thousands of transactions per minute
    * Comprehensive payment processing pipeline with multiple validation stages
 
-2. **Scalable Cloud Architecture:**
-   * Auto-scaling containerized services using ECS Fargate
+2. **Hybrid Cloud Architecture:**
+   * On-premise payment processing with AWS ML integration
    * Real-time data streaming and processing pipeline
-   * Enterprise-grade security and compliance features
+   * Enterprise-grade security with VPN and PrivateLink
 
 3. **Advanced Analytics and Monitoring:**
    * Real-time dashboards for fraud detection metrics
@@ -190,9 +190,9 @@ This project provides experience in:
    * Real-time model inference and continuous training
    * A/B testing and model performance monitoring
 
-2. **Enterprise Cloud Architecture:**
-   * Designing secure, scalable payment processing systems
-   * Implementing microservices architecture with containers
+2. **Hybrid Cloud Architecture:**
+   * Designing secure hybrid cloud payment processing systems
+   * Implementing on-premise to cloud integration patterns
    * Managing complex data pipelines and streaming systems
 
 3. **Security and Compliance:**
@@ -207,10 +207,10 @@ This project provides experience in:
 * **Multi-model Architecture:** Shows expertise in orchestrating multiple ML models (XGBoost, Autoencoder) for comprehensive fraud detection
 * **Streaming ML Pipeline:** Implements real-time data processing and model inference at scale
 
-#### Enterprise Architecture
-* **Payment Processing Expertise:** Shows understanding of complex financial transaction processing
-* **Microservices Design:** Demonstrates modern containerized architecture with ECS Fargate
-* **Security-First Approach:** Implements enterprise-grade security with WAF, VPC, and comprehensive monitoring
+#### Hybrid Cloud Architecture
+* **Payment Processing Expertise:** Shows understanding of complex financial transaction processing on-premise
+* **Cloud Integration Design:** Demonstrates secure hybrid cloud architecture with VPN and PrivateLink
+* **Security-First Approach:** Implements enterprise-grade security with WAF, VPC, VPN encryption, and comprehensive monitoring
 
 #### DevOps and Automation
 * **GitLab CI/CD Integration:** Advanced deployment pipeline with OIDC authentication
@@ -226,10 +226,10 @@ Real-time fraud detection with XGBoost and Autoencoder models
 Streaming data pipelines with Kinesis Firehose
 Comprehensive analytics with QuickSight dashboards
 
-#### **Enterprise Architecture**
-Scalable payment processing with ECS Fargate workers
-Multi-layered security with WAF and VPC PrivateLink
-High-availability design with auto-scaling capabilities
+#### **Hybrid Cloud Architecture**
+On-premise payment processing with AWS ML integration
+Multi-layered security with VPN, WAF, and VPC PrivateLink
+High-availability design with auto-scaling ML services
 
 #### **Security and Compliance**
 PCI DSS compliant payment processing
