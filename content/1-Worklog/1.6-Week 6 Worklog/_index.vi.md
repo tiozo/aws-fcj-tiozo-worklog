@@ -1,8 +1,8 @@
 ---
 title: "Nhật ký tuần 6"
-weight: 1
+weight: 6
 chapter: false
-pre: "<b> 1. </b>"
+pre: "<b> 1.6 </b>"
 ---
 
 ## Mục Tiêu Tuần 6

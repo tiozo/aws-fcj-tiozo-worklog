@@ -1,8 +1,8 @@
 ---
 title: "Week 8 worklog"
-weight: 1
+weight: 8
 chapter: false
-pre: "<b> 1. </b>"
+pre: "<b> 1.8 </b>"
 ---
 
 ## Week 8 Objectives
