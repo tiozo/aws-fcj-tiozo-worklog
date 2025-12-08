@@ -59,37 +59,54 @@ Nền tảng cung cấp giám sát và phân tích toàn diện thông qua Cloud
 
 ![Tổng Quan Kiến Trúc](/images/2-Proposal/architecture.png)
 
-```markdown
-**Tương Tác Người Dùng Frontend**
+#### 1. Luồng Người Dùng Public (Public Access)
 
-1. **Luồng Xác Thực Người Dùng:** Người dùng demo truy cập ứng dụng thông qua frontend web tĩnh được host trên AWS, với các request được định tuyến qua API Gateway đến lớp bảo mật để xác thực.
+Người dùng Internet truy cập ứng dụng web:
 
-2. **Quản Lý Truy Cập An Toàn:** API Gateway xác thực các request thông qua AWS WAF để lọc bảo mật, với thông tin đăng nhập được xác minh với AWS Secrets Manager.
+**(1) User Request:** Người dùng gửi yêu cầu từ phía Client (Web/Mobile).
 
-**Xử Lý Lớp Ứng Dụng**
+**(2) CDN & Caching:** Request đi qua Amazon CloudFront. Dịch vụ này phân phối nội dung tĩnh từ S3 Bucket (Static Web) để tăng tốc độ tải trang.
 
-3. **Định Tuyến Mạng VPC:** Các request đã xác thực vào VPC thông qua VPC PrivateLink, với Lớp Ứng Dụng định tuyến request đến Lớp ML để dự đoán phát hiện gian lận.
+**(3) Security Layer:** Request động (API call) được lọc qua AWS WAF (Web Application Firewall) để chặn các cuộc tấn công phổ biến trước khi vào hệ thống.
 
-4. **Luồng Xử Lý Thanh Toán:** Các request thanh toán kích hoạt ECS Fargate Payment Workers xử lý giao dịch thông qua các handler chuyên biệt (Validator, Proposer, Worker, Executor, Finalizer).
+**(9) API Entry Point:** Các request hợp lệ được chuyển đến API Gateway. Đây là cổng tiếp nhận chính, chịu trách nhiệm định tuyến request và quản lý traffic.
 
-**Pipeline Machine Learning**
+#### 2. Luồng Tích Hợp On-Premise (Private Integration)
 
-5. **Tổng Hợp Dữ Liệu:** Các hàm Lambda Stream Handle thu thập và tổng hợp dữ liệu giao dịch, lưu trữ trong Work History Subnet (StyleDB) và streaming đến Kinesis Firehose.
+Kết nối bảo mật từ hệ thống Server vật lý hiện có lên AWS:
 
-6. **Huấn Luyện và Suy Luận Mô Hình ML:** Kinesis Firehose stream dữ liệu đến Lớp ML nơi các mô hình XGBoost Fraud Detection và Autoencoder Anomaly Detection phân tích giao dịch, với kết quả được hiển thị trong QuickSight.
+**(5) VPN Tunnel:** Server từ dưới Data Center gửi dữ liệu qua đường truyền mã hóa Site-to-Site VPN.
 
-**Quản Lý Dữ Liệu**
+**(6) Private Network Routing:** Traffic đi vào AWS VPC, được điều hướng qua Network Interface nội bộ.
 
-7. **Hoạt Động Cơ Sở Dữ Liệu:** Temporal Config (ECS trên EC2) quản lý orchestration workflow, với dữ liệu thanh toán đã xử lý được lưu trữ trong các bucket StyleDB.
+**(4) VPC PrivateLink:** Traffic đi qua VPC Interface Endpoint. Đây là chốt chặn giúp server on-premise "nhìn thấy" và giao tiếp với dịch vụ AWS như thể đang ở trong mạng nội bộ.
 
-8. **Xử Lý Dữ Liệu Lambda:** API Gateway kích hoạt các hàm Lambda để tổng hợp dữ liệu, với ALB phân phối traffic đến ECS Execution Roles.
+**(8) Internal API Call:** Từ PrivateLink, request được chuyển tiếp an toàn vào lớp API Gateway (mà không cần đi vòng ra Internet công cộng).
 
-**Giám Sát và CI/CD**
+#### 3. Luồng Xử Lý Dữ Liệu & Machine Learning (Core Logic)
 
-9. **Giám Sát Hệ Thống:** CloudWatch giám sát sức khỏe hệ thống và CloudTrail theo dõi các cuộc gọi API để tuân thủ audit.
+Logic nghiệp vụ chính sau khi API Gateway tiếp nhận request:
 
-10. **Pipeline Triển Khai:** GitLab CI/CD với xác thực OIDC quản lý triển khai đến các repository Infrastructure, Application và ML.
-```
+**(15) Request Handling:** API Gateway kích hoạt Lambda Function (api_handler).
+
+**(10) Real-time Inference:** Nếu là tác vụ cần phản hồi ngay (như phát hiện gian lận), Lambda gọi sang model ML (XGBoost/Autoencoder) để lấy kết quả dự đoán tức thì.
+
+**(12) Data Stream:** Dữ liệu log hoặc giao dịch được Lambda đẩy vào luồng Kinesis Firehose để xử lý bất đồng bộ, tránh làm chậm phản hồi của API.
+
+**(13) Data Lake:** Kinesis Firehose gom dữ liệu và ghi xuống S3 Results Bucket để lưu trữ lâu dài.
+
+**(14) Analytics:** Amazon QuickSight kết nối trực tiếp với S3 để hiển thị biểu đồ báo cáo (Dashboard) cho đội ngũ vận hành.
+
+#### 4. Luồng Triển Khai (CI/CD DevOps)
+
+Quy trình tự động hóa cập nhật mã nguồn:
+
+**(16) Source Code:** Developer đẩy code lên GitLab Repository.
+
+**(17) Deployment Pipeline:** GitLab Runner (được cấp quyền qua IAM Role) tự động thực thi pipeline:
+  - Cập nhật code cho Lambda Function
+  - Deploy model mới lên ML Layer
+  - Upload static file mới lên S3 Bucket
 
 ### Giả Định
 
@@ -97,13 +114,13 @@ Nền tảng cung cấp giám sát và phân tích toàn diện thông qua Cloud
 
 Vùng: Tất cả giá cả dựa trên us-east-1 (N. Virginia).
 
-ECS Fargate: Tối ưu kích thước container (0.25 vCPU, 0.5GB RAM cho dev; 1 vCPU, 2GB RAM cho prod) với auto-scaling.
+Kiến Trúc Serverless: API handler dựa trên Lambda với khả năng auto-scaling.
 
-Cơ Sở Dữ Liệu: RDS MySQL với triển khai Multi-AZ cho production, single-AZ cho development.
+Mô Hình ML: SageMaker real-time endpoint với loại instance tối ưu (ml.t3.medium cho dev, ml.m5.xlarge cho prod).
 
-Mô Hình ML: SageMaker real-time endpoint với loại instance tối ưu (ml.t3.medium cho dev, ml.m5.large cho prod).
+Giả Định Traffic: 10K API call/tháng (dev), 1M API call/tháng (prod); 50GB truyền dữ liệu/tháng (prod).
 
-Giả Định Traffic: 10K API call/tháng (dev), 1M API call/tháng (prod); 100GB truyền dữ liệu/tháng (prod).
+Tích Hợp On-Premise: Site-to-Site VPN cho kết nối an toàn từ data center đến AWS VPC.
 
 AWS Free Tier: Tối đa hóa cho môi trường phát triển. Production giả định giá sau free-tier.
 
@@ -115,26 +132,24 @@ Tuyên Bố Miễn Trừ: Phân tích này là ước tính dựa trên giá AWS
 
 | Dịch Vụ | Cấu Hình | Free Tier (Chi Phí Hàng Tháng) | Phát Triển (Chi Phí Hàng Tháng) | Production (Chi Phí Hàng Tháng) | Ghi Chú |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **CloudFront** | Static Web CDN | **$0.00** (1TB truyền) | **$0.00** | **~$15.00** | Phân phối nội dung toàn cầu |
-| **S3** | Nhiều bucket | **$0.00** (5GB lưu trữ) | **$0.00** | **~$8.00** | Dữ liệu ứng dụng, mô hình, thanh toán |
-| **API Gateway** | REST API calls | **$0.00** (1M request) | **$0.00** | **~$35.00** | Mỗi triệu API request |
-| **Application Load Balancer** | Phân phối traffic | **~$18.00** | **~$18.00** | **~$18.00** | Chi phí cố định hàng tháng |
-| **VPC PrivateLink** | Kết nối an toàn | **~$7.20** | **~$7.20** | **~$7.20** | Mỗi endpoint mỗi giờ |
-| **ECS Fargate** | Payment Workers | **~$25.00** | **~$25.00** | **~$120.00** | Tối ưu kích thước container |
-| **EC2** | Temporal Config | **$0.00** (750h t3.micro) | **$0.00** | **~$15.00** | t3.small cho production |
-| **Lambda** | Xử lý dữ liệu | **$0.00** (1M request) | **$0.00** | **~$12.00** | Stream processing và tổng hợp |
-| **SageMaker** | ML model inference | **~$18.00** | **~$18.00** | **~$85.00** | Tối ưu loại instance |
-| **Kinesis Firehose** | Data streaming | **~$3.00** | **~$3.00** | **~$18.00** | Ingestion dữ liệu thời gian thực |
-| **StyleDB (RDS)** | Database storage | **$0.00** (750h db.t3.micro) | **$0.00** | **~$45.00** | Multi-AZ cho production |
-| **Secrets Manager** | Lưu trữ credential | **~$2.00** | **~$2.00** | **~$5.00** | Mỗi secret mỗi tháng |
-| **CloudWatch** | Giám sát & logging | **$0.00** (10 metric, 5GB) | **$0.00** | **~$25.00** | Giám sát toàn diện |
-| **CloudTrail** | API audit logging | **$0.00** (1 trail miễn phí) | **$0.00** | **~$8.00** | Data event bổ sung |
-| **WAF** | Web Application Firewall | **~$8.00** | **~$8.00** | **~$35.00** | Lọc bảo mật |
-| **QuickSight** | Trực quan hóa dữ liệu | **$0.00** (1 user miễn phí) | **$0.00** | **~$18.00** | Business intelligence |
-| **Data Transfer** | Giao tiếp giữa các dịch vụ | **~$2.00** | **~$2.00** | **~$12.00** | VPC và internet egress |
-| **GitLab Runner** | CI/CD compute | **$0.00** (400 phút miễn phí) | **$0.00** | **~$15.00** | Phút build bổ sung |
+| **CloudFront** | Static Web CDN | **$0.00** (1TB truyền) | **$0.00** | **~$15.00** | Phân phối nội dung toàn cầu cho static web |
+| **S3** | Static Web + Results | **$0.00** (5GB lưu trữ) | **$0.00** | **~$8.00** | File tĩnh, kết quả ML, data lake |
+| **API Gateway** | REST API calls | **$0.00** (1M request) | **$0.00** | **~$35.00** | Cổng API chính |
+| **Site-to-Site VPN** | Kết nối on-premise | **~$36.00** | **~$36.00** | **~$36.00** | VPN connection + truyền dữ liệu |
+| **VPC PrivateLink** | Interface Endpoint | **~$7.20** | **~$7.20** | **~$7.20** | Endpoint tích hợp riêng tư |
+| **Lambda** | API handler + xử lý | **$0.00** (1M request) | **$0.00** | **~$20.00** | Xử lý request, gọi ML inference |
+| **SageMaker Endpoint** | XGBoost + Autoencoder | **~$35.00** | **~$35.00** | **~$150.00** | ML inference thời gian thực (ml.t3.medium → ml.m5.xlarge) |
+| **Kinesis Firehose** | Data streaming | **~$3.00** | **~$3.00** | **~$18.00** | Ingestion dữ liệu bất đồng bộ vào S3 |
+| **QuickSight** | Dashboard phân tích | **$0.00** (1 user miễn phí) | **$0.00** | **~$18.00** | Trực quan hóa business intelligence |
+| **WAF** | Web Application Firewall | **~$8.00** | **~$8.00** | **~$35.00** | Lớp bảo mật cho CloudFront/API Gateway |
+| **CloudWatch** | Giám sát & logging | **$0.00** (10 metric, 5GB) | **$0.00** | **~$25.00** | Giám sát hệ thống và logs |
+| **CloudTrail** | API audit logging | **$0.00** (1 trail miễn phí) | **$0.00** | **~$8.00** | Tuân thủ và audit trail |
+| **Secrets Manager** | Lưu trữ credential | **~$2.00** | **~$2.00** | **~$5.00** | Quản lý credential an toàn |
+| **IAM Role** | GitLab OIDC | **$0.00** | **$0.00** | **$0.00** | Miễn phí - Xác thực CI/CD |
+| **Data Transfer** | Inter-service + egress | **~$2.00** | **~$2.00** | **~$15.00** | VPC, VPN và truyền dữ liệu internet |
+| **GitLab Runner** | CI/CD compute | **$0.00** (400 phút miễn phí) | **$0.00** | **~$15.00** | Phút thực thi pipeline |
 | **---** | **---** | **---** | **---** | **---** | **---** |
-| **Tổng Chi Phí Ước Tính** | | **~$83.20 / tháng** | **~$83.20 / tháng** | **~$456.20 / tháng** | Free Tier = Chi phí phát triển |
+| **Tổng Chi Phí Ước Tính** | | **~$93.20 / tháng** | **~$93.20 / tháng** | **~$365.20 / tháng** | Kiến trúc serverless với tích hợp VPN |
 
 ### Đánh Giá Rủi Ro
 
@@ -221,7 +236,7 @@ Xử lý thanh toán tuân thủ PCI DSS
 Mã hóa end-to-end và quản lý credential an toàn
 Audit trail toàn diện với CloudTrail
 
-**Timeline**: 4 tháng | Team: 3 người | Budget: $83-456/tháng (Free Tier/Dev-Prod)
+**Timeline**: 4 tháng | Team: 3 người | Budget: $93-365/tháng (Free Tier/Dev-Prod)
 
 **Dự án này chứng minh chuyên môn trong ML operations, kiến trúc cloud doanh nghiệp và xử lý thanh toán an toàn, làm cho nó trở thành một portfolio piece xuất sắc cho các vai trò ML Engineering, Cloud Architecture và FinTech.**
 
@@ -233,3 +248,5 @@ B. Thông tin liên hệ:
 - Trưởng dự án: Võ Minh Thuận
 - Email: ```azinz850@gmail.com```
 - WhatsApp/Zalo: ```0908517568```
+
+C. Tải Tài Liệu Proposal Đầy Đủ: [ML-Fraud-Detection-Proposal.docx](/files/ML-Fraud-Detection-Proposal.docx)

@@ -59,37 +59,54 @@ The platform offers comprehensive monitoring and analytics through CloudWatch an
 
 ![Architecture Overview](/images/2-Proposal/architecture.png)
 
-```markdown
-**Frontend User Interactions**
+#### 1. Public User Flow (Public Access)
 
-1. **User Authentication Flow:** Demo users access the application through a static web frontend hosted on AWS, with requests routed through API Gateway to the security layer for authentication.
+Internet users access the web application:
 
-2. **Secure Access Management:** API Gateway validates requests through AWS WAF for security filtering, with credentials verified against AWS Secrets Manager.
+**(1) User Request:** Users send requests from Client (Web/Mobile).
 
-**Application Layer Processing**
+**(2) CDN & Caching:** Requests go through Amazon CloudFront, which distributes static content from S3 Bucket (Static Web) to accelerate page loading.
 
-3. **VPC Network Routing:** Authenticated requests enter the VPC through VPC PrivateLink, with the Application Layer routing requests to the ML Layer for fraud detection predictions.
+**(3) Security Layer:** Dynamic requests (API calls) are filtered through AWS WAF (Web Application Firewall) to block common attacks before entering the system.
 
-4. **Payment Processing Workflow:** Payment requests trigger ECS Fargate Payment Workers that process transactions through specialized handlers (Validator, Proposer, Worker, Executor, Finalizer).
+**(9) API Entry Point:** Valid requests are forwarded to API Gateway, the main entry point responsible for request routing and traffic management.
 
-**Machine Learning Pipeline**
+#### 2. On-Premise Integration Flow (Private Integration)
 
-5. **Data Aggregation:** Stream Handle Lambda functions collect and aggregate transaction data, storing it in Work History Subnet (StyleDB) and streaming to Kinesis Firehose.
+Secure connection from existing physical servers to AWS:
 
-6. **ML Model Training and Inference:** Kinesis Firehose streams data to the ML Layer where XGBoost Fraud Detection and Autoencoder Anomaly Detection models analyze transactions, with results visualized in QuickSight.
+**(5) VPN Tunnel:** Servers from the Data Center send data through encrypted Site-to-Site VPN.
 
-**Data Management**
+**(6) Private Network Routing:** Traffic enters AWS VPC, routed through internal Network Interface.
 
-7. **Database Operations:** Temporal Config (ECS on EC2) manages workflow orchestration, with processed payment data stored in StyleDB buckets.
+**(4) VPC PrivateLink:** Traffic goes through VPC Interface Endpoint, allowing on-premise servers to communicate with AWS services as if they were on the internal network.
 
-8. **Lambda Data Processing:** API Gateway triggers Lambda functions for data aggregation, with ALB distributing traffic to ECS Execution Roles.
+**(8) Internal API Call:** From PrivateLink, requests are securely forwarded to API Gateway layer (without going through the public Internet).
 
-**Monitoring and CI/CD**
+#### 3. Data Processing & Machine Learning Flow (Core Logic)
 
-9. **System Monitoring:** CloudWatch monitors system health and CloudTrail tracks API calls for audit compliance.
+Main business logic after API Gateway receives requests:
 
-10. **Deployment Pipeline:** GitLab CI/CD with OIDC authentication manages deployments to Infrastructure, Application, and ML repositories.
-```
+**(15) Request Handling:** API Gateway triggers Lambda Function (api_handler).
+
+**(10) Real-time Inference:** For tasks requiring immediate response (like fraud detection), Lambda calls ML models (XGBoost/Autoencoder) to get instant predictions.
+
+**(12) Data Stream:** Log or transaction data is pushed by Lambda into Kinesis Firehose for asynchronous processing, avoiding API response delays.
+
+**(13) Data Lake:** Kinesis Firehose collects data and writes to S3 Results Bucket for long-term storage.
+
+**(14) Analytics:** Amazon QuickSight connects directly to S3 to display dashboard reports for the operations team.
+
+#### 4. Deployment Flow (CI/CD DevOps)
+
+Automated source code update process:
+
+**(16) Source Code:** Developers push code to GitLab Repository.
+
+**(17) Deployment Pipeline:** GitLab Runner (granted permissions via IAM Role) automatically executes pipeline:
+  - Updates Lambda Function code
+  - Deploys new models to ML Layer
+  - Uploads new static files to S3 Bucket
 
 ### Assumption
 
@@ -97,13 +114,13 @@ The platform offers comprehensive monitoring and analytics through CloudWatch an
 
 Region: All pricing is based on us-east-1 (N. Virginia).
 
-ECS Fargate: Optimized container sizing (0.25 vCPU, 0.5GB RAM for dev; 1 vCPU, 2GB RAM for prod) with auto-scaling.
+Serverless Architecture: Lambda-based API handlers with auto-scaling capabilities.
 
-Database: RDS MySQL with Multi-AZ deployment for production, single-AZ for development.
+ML Models: SageMaker real-time endpoints with optimized instance types (ml.t3.medium for dev, ml.m5.xlarge for prod).
 
-ML Models: SageMaker real-time endpoints with optimized instance types (ml.t3.medium for dev, ml.m5.large for prod).
+Traffic Assumptions: 10K API calls/month (dev), 1M API calls/month (prod); 50GB data transfer/month (prod).
 
-Traffic Assumptions: 10K API calls/month (dev), 1M API calls/month (prod); 100GB data transfer/month (prod).
+On-Premise Integration: Site-to-Site VPN for secure connectivity from data center to AWS VPC.
 
 AWS Free Tier: Maximized for development environment. Production assumes post-free-tier pricing.
 
@@ -115,26 +132,24 @@ Disclaimer: This analysis is an estimate based on current AWS pricing. Costs may
 
 | Service | Configuration | Free Tier (Monthly Cost) | Development (Monthly Cost) | Production (Monthly Cost) | Notes |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **CloudFront** | Static Web CDN | **$0.00** (1TB transfer) | **$0.00** | **~$15.00** | Global content delivery |
-| **S3** | Multiple buckets | **$0.00** (5GB storage) | **$0.00** | **~$8.00** | Application, Model, Payment data |
-| **API Gateway** | REST API calls | **$0.00** (1M requests) | **$0.00** | **~$35.00** | Per million API requests |
-| **Application Load Balancer** | Traffic distribution | **~$18.00** | **~$18.00** | **~$18.00** | Fixed monthly cost |
-| **VPC PrivateLink** | Secure connectivity | **~$7.20** | **~$7.20** | **~$7.20** | Per endpoint per hour |
-| **ECS Fargate** | Payment Workers | **~$25.00** | **~$25.00** | **~$120.00** | Optimized container sizing |
-| **EC2** | Temporal Config | **$0.00** (750h t3.micro) | **$0.00** | **~$15.00** | t3.small for production |
-| **Lambda** | Data processing | **$0.00** (1M requests) | **$0.00** | **~$12.00** | Stream processing and aggregation |
-| **SageMaker** | ML model inference | **~$18.00** | **~$18.00** | **~$85.00** | Optimized instance types |
-| **Kinesis Firehose** | Data streaming | **~$3.00** | **~$3.00** | **~$18.00** | Real-time data ingestion |
-| **StyleDB (RDS)** | Database storage | **$0.00** (750h db.t3.micro) | **$0.00** | **~$45.00** | Multi-AZ for production |
-| **Secrets Manager** | Credential storage | **~$2.00** | **~$2.00** | **~$5.00** | Per secret per month |
-| **CloudWatch** | Monitoring & logging | **$0.00** (10 metrics, 5GB) | **$0.00** | **~$25.00** | Comprehensive monitoring |
-| **CloudTrail** | API audit logging | **$0.00** (1 trail free) | **$0.00** | **~$8.00** | Additional data events |
-| **WAF** | Web Application Firewall | **~$8.00** | **~$8.00** | **~$35.00** | Security filtering |
-| **QuickSight** | Data visualization | **$0.00** (1 user free) | **$0.00** | **~$18.00** | Business intelligence |
-| **Data Transfer** | Inter-service communication | **~$2.00** | **~$2.00** | **~$12.00** | VPC and internet egress |
-| **GitLab Runner** | CI/CD compute | **$0.00** (400 min free) | **$0.00** | **~$15.00** | Additional build minutes |
+| **CloudFront** | Static Web CDN | **$0.00** (1TB transfer) | **$0.00** | **~$15.00** | Global content delivery for static web |
+| **S3** | Static Web + Results | **$0.00** (5GB storage) | **$0.00** | **~$8.00** | Static files, ML results, data lake |
+| **API Gateway** | REST API calls | **$0.00** (1M requests) | **$0.00** | **~$35.00** | Main API entry point |
+| **Site-to-Site VPN** | On-premise connection | **~$36.00** | **~$36.00** | **~$36.00** | VPN connection + data transfer |
+| **VPC PrivateLink** | Interface Endpoint | **~$7.20** | **~$7.20** | **~$7.20** | Private integration endpoint |
+| **Lambda** | API handler + processing | **$0.00** (1M requests) | **$0.00** | **~$20.00** | Request handling, ML inference calls |
+| **SageMaker Endpoint** | XGBoost + Autoencoder | **~$35.00** | **~$35.00** | **~$150.00** | Real-time ML inference (ml.t3.medium → ml.m5.xlarge) |
+| **Kinesis Firehose** | Data streaming | **~$3.00** | **~$3.00** | **~$18.00** | Async data ingestion to S3 |
+| **QuickSight** | Analytics dashboard | **$0.00** (1 user free) | **$0.00** | **~$18.00** | Business intelligence visualization |
+| **WAF** | Web Application Firewall | **~$8.00** | **~$8.00** | **~$35.00** | Security layer for CloudFront/API Gateway |
+| **CloudWatch** | Monitoring & logging | **$0.00** (10 metrics, 5GB) | **$0.00** | **~$25.00** | System monitoring and logs |
+| **CloudTrail** | API audit logging | **$0.00** (1 trail free) | **$0.00** | **~$8.00** | Compliance and audit trail |
+| **Secrets Manager** | Credential storage | **~$2.00** | **~$2.00** | **~$5.00** | Secure credential management |
+| **IAM Role** | GitLab OIDC | **$0.00** | **$0.00** | **$0.00** | Free - CI/CD authentication |
+| **Data Transfer** | Inter-service + egress | **~$2.00** | **~$2.00** | **~$15.00** | VPC, VPN, and internet data transfer |
+| **GitLab Runner** | CI/CD compute | **$0.00** (400 min free) | **$0.00** | **~$15.00** | Pipeline execution minutes |
 | **---** | **---** | **---** | **---** | **---** | **---** |
-| **Total Estimated Cost** | | **~$83.20 / month** | **~$83.20 / month** | **~$456.20 / month** | Free Tier = Development cost |
+| **Total Estimated Cost** | | **~$93.20 / month** | **~$93.20 / month** | **~$365.20 / month** | Serverless architecture with VPN integration |
 
 ### Risk Assessment
 
@@ -221,7 +236,7 @@ PCI DSS compliant payment processing
 End-to-end encryption and secure credential management
 Comprehensive audit trails with CloudTrail
 
-**Timeline**: 4 months | Team: 3 people | Budget: $83-456/month (Free Tier/Dev-Prod)
+**Timeline**: 4 months | Team: 3 people | Budget: $93-365/month (Free Tier/Dev-Prod)
 
 **This project demonstrates expertise in ML operations, enterprise cloud architecture, and secure payment processing, making it an excellent portfolio piece for ML Engineering, Cloud Architecture, and FinTech roles.**
 
@@ -233,3 +248,5 @@ B. Contacts info:
 - Project Lead: Vo Minh Thuan
 - Email: ```azinz850@gmail.com```
 - WhatsApp/Zalo: ```0908517568```
+
+C. Download Full Proposal Document: [ML-Fraud-Detection-Proposal.docx](/files/ML-Fraud-Detection-Proposal.docx)
